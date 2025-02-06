@@ -72,7 +72,7 @@ export function Login() {
           <Text style={styles.forgotPasswordText}>Quên mật khẩu?</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.loginButton}>
+        <TouchableOpacity style={styles.loginButton} onPress={() => navigation.navigate("Home")}>
           <Text style={styles.loginButtonText}>Đăng nhập</Text>
         </TouchableOpacity>
 
