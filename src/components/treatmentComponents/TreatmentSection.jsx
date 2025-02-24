@@ -80,8 +80,7 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 50,
     width: '100%',
     paddingHorizontal: 41,
-    paddingTop: 65,
-    paddingBottom: 65,
+    paddingVertical: 65,
   },
   sectionTitle: {
     color: 'rgba(66, 56, 56, 1)',
