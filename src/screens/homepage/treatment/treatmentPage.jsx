@@ -1,25 +1,17 @@
 import {
-  View,
   StyleSheet,
-  Text,
-  TouchableOpacity,
   SafeAreaView,
-  Button,
 } from "react-native";
-import { useState, useEffect, useRef } from "react";
-import { Ionicons } from "@expo/vector-icons";
-import { useNavigation } from "@react-navigation/native";
+import { ScrollView } from "react-native-gesture-handler";
+import TreatmentSection from "../../../components/treatmentComponents/TreatmentSection";
 
 export function TreatmentPage() {
-  const navigation = useNavigation();
 
   return (
     <SafeAreaView style={styles.container}>
-      <Text>Treatmen Page</Text>
-      <Button
-        title="Booking Treatment"
-        onPress={() => navigation.navigate("BookingTreatment")}
-      ></Button>
+      <ScrollView>
+        <TreatmentSection />
+      </ScrollView>
     </SafeAreaView>
   );
 }
@@ -27,5 +19,6 @@ export function TreatmentPage() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: '#fff'
   },
 });
