@@ -16,8 +16,14 @@ export function Profile() {
   return (
     <SafeAreaView style={styles.container}>
       <Text>Profile</Text>
-      <Button title="Edit Account" onPress={() => navigation.navigate("EditAccount")}></Button>
-      <Button title="Quiz Record" onPress={() => navigation.navigate("QuizRecord")}></Button>
+      <Button
+        title="Edit Account"
+        onPress={() => navigation.navigate("EditAccount")}
+      ></Button>
+      <Button
+        title="Quiz Record"
+        onPress={() => navigation.navigate("QuizRecord")}
+      ></Button>
     </SafeAreaView>
   );
 }
