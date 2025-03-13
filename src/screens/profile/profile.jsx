@@ -80,10 +80,6 @@ export function Profile() {
           <Text style={styles.username}>User12345</Text>
           <Text style={styles.email}>user123@gmail.com</Text>
           
-          <View style={styles.verifiedBadge}>
-            <Text style={styles.verifiedText}>Verified</Text>
-          </View>
-          
           <TouchableOpacity 
             style={styles.editButton}
             onPress={() => navigation.navigate("EditAccount")}
@@ -145,18 +141,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#666",
     marginBottom: 10,
-  },
-  verifiedBadge: {
-    backgroundColor: "#4CD964",
-    paddingHorizontal: 12,
-    paddingVertical: 4,
-    borderRadius: 20,
-    marginBottom: 15,
-  },
-  verifiedText: {
-    color: "white",
-    fontSize: 12,
-    fontWeight: "500",
   },
   editButton: {
     backgroundColor: "#E86464",
