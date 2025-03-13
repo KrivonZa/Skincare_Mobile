@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { createStackNavigator } from "@react-navigation/stack";
 // import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Login, Signup, ForgotPass } from "../screens/auth"
+import { Login, Signup } from "../screens/auth"
 
 const Stack = createStackNavigator();
 
@@ -38,13 +38,6 @@ export function AuthNavigation({ navigation }) {
       <Stack.Screen
         name="Signup"
         component={Signup}
-        options={{
-          headerShown: false,
-        }}
-      />
-      <Stack.Screen
-        name="ForgotPass"
-        component={ForgotPass}
         options={{
           headerShown: false,
         }}

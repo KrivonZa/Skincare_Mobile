@@ -38,7 +38,7 @@ export function Login() {
       <Animated.View
         style={[styles.formLogin, { transform: [{ translateY }] }]}
       >
-        <Text style={styles.title}>Đăng nhập</Text>
+        <Text style={styles.title}>Login</Text>
 
         <TextInput
           style={styles.input}
@@ -53,7 +53,7 @@ export function Login() {
               styles.input,
               { flex: 1, marginBottom: 0 },
             ]}
-            placeholder="Mật khẩu"
+            placeholder="Password"
             placeholderTextColor="#a1a1a1"
             secureTextEntry={!passwordVisible}
           />
@@ -68,23 +68,14 @@ export function Login() {
           </TouchableOpacity>
         </View>
 
-        <TouchableOpacity style={styles.forgotPasswordButton} onPress={() => navigation.navigate("ForgotPass")}>
-          <Text style={styles.forgotPasswordText}>Quên mật khẩu?</Text>
-        </TouchableOpacity>
-
         <TouchableOpacity style={styles.loginButton} onPress={() => navigation.navigate("Home")}>
-          <Text style={styles.loginButtonText}>Đăng nhập</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.googleLoginButton}>
-          <Ionicons name="logo-google" size={20} color="#fff" />
-          <Text style={styles.googleLoginText}>Đăng nhập bằng Google</Text>
+          <Text style={styles.loginButtonText}>Login</Text>
         </TouchableOpacity>
 
         <View style={styles.registerContainer}>
-          <Text style={styles.registerText}>Chưa có tài khoản? </Text>
+          <Text style={styles.registerText}>Don't have an account? </Text>
           <TouchableOpacity onPress={() => navigation.navigate("Signup")}>
-            <Text style={styles.registerLink}>Đăng ký</Text>
+            <Text style={styles.registerLink}>Register</Text>
           </TouchableOpacity>
         </View>
       </Animated.View>
