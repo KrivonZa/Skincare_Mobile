@@ -52,12 +52,6 @@ export function Testimonial() {
       <View style={styles.cardContent}>
         <Text style={styles.cardTitle}>{item.title}</Text>
         <Text style={styles.cardDescription}>{item.description}</Text>
-        <TouchableOpacity
-          style={styles.cardButton}
-          onPress={() => navigation.navigate("TreatmentDetails")}
-        >
-          <Text style={styles.cardButtonText}>Tìm hiểu thêm</Text>
-        </TouchableOpacity>
       </View>
     </View>
   );
@@ -66,7 +60,7 @@ export function Testimonial() {
     <View style={styles.treatmentSection}>
       <Text style={styles.treatmentTitle}>Testimonial</Text>
       <Text style={styles.treatmentSubtitle}>
-        Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+        Hear what our satisfied clients have to say about their Crystal Care experiences.
       </Text>
       <FlatList
         data={treatmentData}
@@ -76,9 +70,6 @@ export function Testimonial() {
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.cardContainer}
       />
-      <TouchableOpacity onPress={() => navigation.navigate("ViewAllTreatment")}>
-        <Text style={styles.viewAllTreatmentButton}>View all testimonial</Text>
-      </TouchableOpacity>
     </View>
   );
 }
@@ -138,26 +129,5 @@ const styles = StyleSheet.create({
     color: "#666",
     marginBottom: 16,
     lineHeight: 20,
-  },
-  cardButton: {
-    backgroundColor: "#F06B7E",
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 20,
-    alignSelf: "flex-start",
-  },
-  cardButtonText: {
-    color: "#fff",
-    fontSize: 14,
-    fontWeight: "600",
-  },
-  viewAllTreatmentButton: {
-    backgroundColor: "#F06B7E",
-    marginTop: 10,
-    paddingVertical: 6,
-    paddingHorizontal: 14,
-    borderRadius: 20,
-    alignSelf: "center",
-    color: "white",
   },
 });

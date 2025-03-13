@@ -15,25 +15,25 @@ const screenWidth = Dimensions.get("window").width;
 const treatmentData = [
   {
     id: "1",
-    title: "Can I Erase My Under Eye Bags?",
+    title: "Say Goodbye to Under Eye Bags: Effective Treatments Revealed",
     description:
-      "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquet quisque eu mauris, ut dolor diam...",
+      "Discover proven methods to reduce under-eye puffiness and dark circles. From lifestyle changes to advanced treatments, we've got you covered.",
     image:
       "https://s3-alpha-sig.figma.com/img/f08d/ed94/004de3fc45814df9df8c0ff216c96811?Expires=1739750400&Key-Pair-Id=APKAQ4GOSFWCW27IBOMQ&Signature=lorv03AsU1KFopfEFB11hpUG1yXxVJjHOc0nqAq6q4ttGeNjITZU968dm7UifrqZEbAr4z5EDMj1yObnF3rGUltk-BnmxCu5OPUeWQeornNfZcDUeb3U1315LqKx3HP~nHW9nY9YvU0clkHR3v9soO4VWJcTJcpXqVbezCaEThKQKvABo7HoZs0LmCHyM1bMkt1eSb8xRfu2LZ4fNxckz1zmyH5DyrsyfC0xyHPr7x5JLplNqcdnA6XA1afylNt8OuUt3yG6RrWPKkLjVdpoQzTE2TrBtxfyqwg0BieBAboCvI8eZmhq5VRd2eY2XB7hjDhdZxd3T-xeZze-zHQvPA__",
   },
   {
     id: "2",
-    title: "These Skin Care Trends Will Be Everywhere in 2021",
+    title: "2024 Skincare Trends: Expert Predictions for Radiant Skin",
     description:
-      "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquet quisque eu mauris, ut dolor diam...",
+      "Stay ahead of the curve with the latest skincare trends. Learn about innovative ingredients, techniques, and products that will revolutionize your routine.",
     image:
       "https://s3-alpha-sig.figma.com/img/f08d/ed94/004de3fc45814df9df8c0ff216c96811?Expires=1739750400&Key-Pair-Id=APKAQ4GOSFWCW27IBOMQ&Signature=lorv03AsU1KFopfEFB11hpUG1yXxVJjHOc0nqAq6q4ttGeNjITZU968dm7UifrqZEbAr4z5EDMj1yObnF3rGUltk-BnmxCu5OPUeWQeornNfZcDUeb3U1315LqKx3HP~nHW9nY9YvU0clkHR3v9soO4VWJcTJcpXqVbezCaEThKQKvABo7HoZs0LmCHyM1bMkt1eSb8xRfu2LZ4fNxckz1zmyH5DyrsyfC0xyHPr7x5JLplNqcdnA6XA1afylNt8OuUt3yG6RrWPKkLjVdpoQzTE2TrBtxfyqwg0BieBAboCvI8eZmhq5VRd2eY2XB7hjDhdZxd3T-xeZze-zHQvPA__",
   },
   {
     id: "3",
-    title: "The Best Beauty Hacks For Women Over 40",
+    title: "Ageless Beauty: Top Skincare Hacks for Women Over 40",
     description:
-      "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquet quisque eu mauris, ut dolor diam...",
+      "Discover essential beauty tips and tricks to maintain youthful, glowing skin after 40. Learn about targeted treatments and effective skincare routines.",
     image:
       "https://s3-alpha-sig.figma.com/img/f08d/ed94/004de3fc45814df9df8c0ff216c96811?Expires=1739750400&Key-Pair-Id=APKAQ4GOSFWCW27IBOMQ&Signature=lorv03AsU1KFopfEFB11hpUG1yXxVJjHOc0nqAq6q4ttGeNjITZU968dm7UifrqZEbAr4z5EDMj1yObnF3rGUltk-BnmxCu5OPUeWQeornNfZcDUeb3U1315LqKx3HP~nHW9nY9YvU0clkHR3v9soO4VWJcTJcpXqVbezCaEThKQKvABo7HoZs0LmCHyM1bMkt1eSb8xRfu2LZ4fNxckz1zmyH5DyrsyfC0xyHPr7x5JLplNqcdnA6XA1afylNt8OuUt3yG6RrWPKkLjVdpoQzTE2TrBtxfyqwg0BieBAboCvI8eZmhq5VRd2eY2XB7hjDhdZxd3T-xeZze-zHQvPA__",
   },
@@ -55,7 +55,7 @@ export function Blogs() {
         <TouchableOpacity
           onPress={() => navigation.navigate("TreatmentDetails")}
         >
-          <Text style={styles.cardText}>Xem thêm</Text>
+          <Text style={styles.cardText}>See more</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -65,7 +65,7 @@ export function Blogs() {
     <View style={styles.treatmentSection}>
       <Text style={styles.treatmentTitle}>News & Promo</Text>
       <Text style={styles.treatmentSubtitle}>
-        Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+        Stay updated with the latest news, skincare tips, and exclusive promotions from Crystal Care.
       </Text>
       <FlatList
         data={treatmentData}
