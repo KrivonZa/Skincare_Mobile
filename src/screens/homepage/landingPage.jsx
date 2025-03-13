@@ -1,13 +1,10 @@
 import {
   View,
   StyleSheet,
-  TextInput,
   Text,
   TouchableOpacity,
   SafeAreaView,
-  Image,
   ScrollView,
-  Dimensions,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import {
@@ -27,13 +24,13 @@ export function LandingPage() {
         <View style={styles.firstSection}>
           <Text style={styles.brandName}>Crystal Care</Text>
           <Text style={styles.tagline}>
-            Làm đẹp chưa bao giờ dễ dàng đến thế.
+            Beauty has never been easier.
           </Text>
           <TouchableOpacity
             style={styles.learnMoreButton}
             onPress={() => navigation.navigate("About")}
           >
-            <Text style={styles.buttonText}>Tìm hiểu về chúng tôi</Text>
+            <Text style={styles.buttonText}>Learn about us</Text>
           </TouchableOpacity>
         </View>
 
@@ -43,12 +40,11 @@ export function LandingPage() {
 
         <View style={styles.bookingContent}>
           <Text style={styles.quote}>
-            “Lorem ipsum dolor sit amet, consectetur adipiscing elit. In turpis
-            interdum lectus nibh at euismod.”
+            "Our skin is a reflection of our inner well-being. At Crystal Care, we nurture its natural beauty."
           </Text>
           <View style={styles.circle}></View>
           <Text style={styles.founder}>
-            dr. Arimbi Aditya, Founder of Metime Skincare.
+            Dr. Arimbi Aditya, Founder of Crystal Care.
           </Text>
         </View>
 
@@ -61,9 +57,7 @@ export function LandingPage() {
             give you an enjoyable and healthy solution to find your balance
             again.
           </Text>
-          <Text style={styles.openTime}>Mon-Fri : 9 AM – 4 PM</Text>
-          <Text style={styles.openTime}>Mon-Fri : 9 AM – 4 PM</Text>
-          <Text style={styles.openTime}>Mon-Fri : 9 AM – 4 PM</Text>
+          <Text style={styles.openTime}>Mon-Fri : 7:30 AM – 17:30 PM</Text>
         </View>
         <Contact />
       </ScrollView>

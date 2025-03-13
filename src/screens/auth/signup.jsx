@@ -18,11 +18,11 @@ export function Signup() {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.formSignup}>
-        <Text style={styles.title}>Đăng ký</Text>
+        <Text style={styles.title}>Register</Text>
 
         <TextInput
           style={styles.input}
-          placeholder="Tên người dùng"
+          placeholder="Username"
           placeholderTextColor="#a1a1a1"
         />
 
@@ -36,7 +36,7 @@ export function Signup() {
         <View style={styles.passwordContainer}>
           <TextInput
             style={[styles.input, { flex: 1, marginBottom: 0, borderRadius: 0 }]}
-            placeholder="Mật khẩu"
+            placeholder="Password"
             placeholderTextColor="#a1a1a1"
             secureTextEntry={!passwordVisible}
           />
@@ -54,7 +54,7 @@ export function Signup() {
         <View style={styles.passwordContainer}>
           <TextInput
             style={[styles.input, { flex: 1, marginBottom: 0, borderRadius: 0 }]}
-            placeholder="Xác nhận mật khẩu"
+            placeholder="Confirm Password"
             placeholderTextColor="#a1a1a1"
             secureTextEntry={!confirmPasswordVisible}
           />
@@ -70,13 +70,13 @@ export function Signup() {
         </View>
 
         <TouchableOpacity style={styles.signupButton}>
-          <Text style={styles.signupButtonText}>Đăng ký</Text>
+          <Text style={styles.signupButtonText}>Register</Text>
         </TouchableOpacity>
 
         <View style={styles.loginRedirect}>
-          <Text style={styles.loginText}>Đã có tài khoản? </Text>
-          <TouchableOpacity onPress={() => navigation.goBack()}>
-            <Text style={styles.loginLink}>Đăng nhập</Text>
+          <Text style={styles.loginText}>Already have account? </Text>
+          <TouchableOpacity onPress={() => navigation.navigate("Login")}>
+            <Text style={styles.loginLink}>Login</Text>
           </TouchableOpacity>
         </View>
       </View>

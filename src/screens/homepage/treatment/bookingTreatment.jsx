@@ -14,17 +14,6 @@ export function BookingTreatment({ route }) {
   const { treatment } = route.params;
   const navigation = useNavigation();
 
-  //Dùng để tắt header của drawer, chỉ show header của stack
-  useEffect(() => {
-    navigation.getParent()?.setOptions({
-      headerShown: false,
-    });
-    return () =>
-      navigation.getParent()?.setOptions({
-        headerShown: true,
-      });
-  }, [navigation]);
-
   return (
     <SafeAreaView>
       <ScrollView>

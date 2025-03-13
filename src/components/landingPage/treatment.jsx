@@ -56,7 +56,7 @@ export function Treatment() {
           style={styles.cardButton}
           onPress={() => navigation.navigate("TreatmentDetails")}
         >
-          <Text style={styles.cardButtonText}>Tìm hiểu thêm</Text>
+          <Text style={styles.cardButtonText}>Learn more</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -64,9 +64,9 @@ export function Treatment() {
 
   return (
     <View style={styles.treatmentSection}>
-      <Text style={styles.treatmentTitle}>Trị liệu</Text>
+      <Text style={styles.treatmentTitle}>Therapy</Text>
       <Text style={styles.treatmentSubtitle}>
-        Cung cấp cho bạn những dịch vụ trị liệu tốt nhất
+        Providing you with the best therapeutic services
       </Text>
       <FlatList
         data={treatmentData}
@@ -77,7 +77,7 @@ export function Treatment() {
         contentContainerStyle={styles.cardContainer}
       />
       <TouchableOpacity onPress={() => navigation.navigate("ViewAllTreatment")}>
-        <Text style={styles.viewAllTreatmentButton}>Xem tất cả dịch vụ</Text>
+        <Text style={styles.viewAllTreatmentButton}>View all services</Text>
       </TouchableOpacity>
     </View>
   );

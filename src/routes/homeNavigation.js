@@ -4,71 +4,17 @@ import { createDrawerNavigator } from "@react-navigation/drawer";
 import { createStackNavigator } from "@react-navigation/stack";
 import {
   LandingPage,
-  TreatmentPage,
-  BookingStatus,
   BookingDetail,
-  BookingTreatment
+  BookingTreatment,
 } from "../screens/homepage";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
+import { TreatmentNavigation, BookingNavigation } from "./homeRoute";
 
 const Drawer = createDrawerNavigator();
-const TreatmentStack = createStackNavigator();
-const BookingStack = createStackNavigator();
+const Home = createStackNavigator();
 
-// Navigation cho Treatment
-function TreatmentNavigation() {
-  return (
-    <TreatmentStack.Navigator
-      screenOptions={{
-        headerStyle: {
-          backgroundColor: "#ff909a",
-        },
-        headerTintColor: "#ffffff",
-        headerTitleAlign: "center",
-      }}
-    >
-      <TreatmentStack.Screen
-        name="TreatmentPage"
-        component={TreatmentPage}
-        options={{ title: "Dịch vụ Trị liệu", headerShown: false }}
-      />
-      <TreatmentStack.Screen
-        name="BookingTreatment"
-        component={BookingTreatment}
-        options={{ title: "Đặt lịch Trị liệu", headerShown: true, }}
-      />
-    </TreatmentStack.Navigator>
-  );
-}
-
-// Navigation cho Booking
-function BookingNavigation() {
-  return (
-    <BookingStack.Navigator
-      screenOptions={{
-        headerStyle: {
-          backgroundColor: "#ff909a",
-        },
-        headerTintColor: "#ffffff",
-        headerTitleAlign: "center",
-      }}
-    >
-      <BookingStack.Screen
-        name="BookingStatus"
-        component={BookingStatus}
-        options={{ title: "Trạng thái đặt lịch", headerShown: false }}
-      />
-      <BookingStack.Screen
-        name="BookingDetail"
-        component={BookingDetail}
-        options={{ title: "Chi tiết đặt lịch", headerShown: true }}
-      />
-    </BookingStack.Navigator>
-  );
-}
-
-export function HomeNavigation() {
+function DrawerNavigation() {
   const navigation = useNavigation();
   return (
     <Drawer.Navigator
@@ -103,7 +49,7 @@ export function HomeNavigation() {
         name="LandingPage"
         component={LandingPage}
         options={{
-          title: "Trang Chủ",
+          title: "Home",
           drawerIcon: ({ color, size }) => (
             <Ionicons name="home-outline" size={size} color={color} />
           ),
@@ -113,7 +59,7 @@ export function HomeNavigation() {
         name="Treatment"
         component={TreatmentNavigation}
         options={{
-          title: "Dịch vụ",
+          title: "Treatment",
           drawerIcon: ({ color, size }) => (
             <Ionicons name="medkit-outline" size={size} color={color} />
           ),
@@ -123,13 +69,44 @@ export function HomeNavigation() {
         name="Booking"
         component={BookingNavigation}
         options={{
-          title: "Lịch hẹn",
+          title: "Booking Schedule",
           drawerIcon: ({ color, size }) => (
             <Ionicons name="calendar-outline" size={size} color={color} />
           ),
         }}
       />
     </Drawer.Navigator>
+  );
+}
+
+export function HomeNavigation() {
+  return (
+    <Home.Navigator
+      initialRouteName="DrawerNavigation"
+      screenOptions={{
+        headerStyle: {
+          backgroundColor: "#ff909a",
+        },
+        headerTintColor: "#fff",
+        headerTitleAlign: "center",
+      }}
+    >
+      <Home.Screen
+        name="DrawerNavigation"
+        component={DrawerNavigation}
+        options={{ headerShown: false }}
+      />
+      <Home.Screen
+        name="BookingDetail"
+        component={BookingDetail}
+        options={{ title: "Chi tiết đặt lịch", headerShown: true }}
+      />
+      <Home.Screen
+        name="BookingTreatment"
+        component={BookingTreatment}
+        options={{ title: "Đặt lịch Trị liệu", headerShown: true }}
+      />
+    </Home.Navigator>
   );
 }
 

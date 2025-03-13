@@ -16,9 +16,7 @@ export function Benefit() {
         />
         <Text style={styles.contentTitle}>Easy book & Payment</Text>
         <Text style={styles.contentSubtitle}>
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Imperdiet
-          velit orci, morbi sociis feugiat eros quam. Fermentum proin faucibus
-          egestas ac gravida nulla montes.
+          Schedule your appointments and pay securely with just a few taps. Enjoy a seamless experience from booking to billing.
         </Text>
       </View>
       <View style={styles.userProfile}>
@@ -31,9 +29,7 @@ export function Benefit() {
         />
         <Text style={styles.contentTitle}>User Profile Management</Text>
         <Text style={styles.contentSubtitle}>
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Imperdiet
-          velit orci, morbi sociis feugiat eros quam. Fermentum proin faucibus
-          egestas ac gravida nulla montes.
+          Take control of your personal information, manage your appointments, and track your skin care journey all in one place.
         </Text>
       </View>
       <View style={styles.bookingContent}>
@@ -46,9 +42,7 @@ export function Benefit() {
         />
         <Text style={styles.contentTitle}>Awards and Recognition</Text>
         <Text style={styles.contentSubtitle}>
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Imperdiet
-          velit orci, morbi sociis feugiat eros quam. Fermentum proin faucibus
-          egestas ac gravida nulla montes.
+          Crystal Care is proud to be recognized for its commitment to excellence in skincare. We have received numerous awards for our innovative treatments and exceptional customer service.
         </Text>
       </View>
     </View>
