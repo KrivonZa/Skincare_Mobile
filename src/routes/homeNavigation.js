@@ -59,7 +59,7 @@ function DrawerNavigation() {
         name="Treatment"
         component={TreatmentNavigation}
         options={{
-          title: "Treatment",
+          title: "Service",
           drawerIcon: ({ color, size }) => (
             <Ionicons name="medkit-outline" size={size} color={color} />
           ),
@@ -99,12 +99,12 @@ export function HomeNavigation() {
       <Home.Screen
         name="BookingDetail"
         component={BookingDetail}
-        options={{ title: "Chi tiết đặt lịch", headerShown: true }}
+        options={{ title: "Booking Detail", headerShown: true }}
       />
       <Home.Screen
         name="BookingTreatment"
         component={BookingTreatment}
-        options={{ title: "Đặt lịch Trị liệu", headerShown: true }}
+        options={{ title: "Booking Service", headerShown: true }}
       />
     </Home.Navigator>
   );

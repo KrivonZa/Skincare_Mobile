@@ -20,21 +20,21 @@ export function ProfileNavigation({ navigation }) {
         name="Account"
         component={Profile}
         options={{
-          title: "Tài khoản",
+          title: "Account",
         }}
       />
       <Stack.Screen
         name="EditAccount"
         component={EditAccount}
         options={{
-          title: "Chỉnh sửa Tài khoản",
+          title: "Edit Account",
         }}
       />
       <Stack.Screen
         name="QuizRecord"
         component={QuizRecord}
         options={{
-          title: "Trắc nghiệm về da",
+          title: "Skin Test",
         }}
       />
     </Stack.Navigator>

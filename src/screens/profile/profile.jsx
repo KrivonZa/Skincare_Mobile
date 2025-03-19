@@ -56,6 +56,11 @@ export function Profile() {
       screen: "MedicalRecords",
     },
     {
+      title: "Skin Test",
+      icon: "color-palette-outline",
+      screen: "QuizRecord",
+    },
+    {
       title: "Settings",
       icon: "settings-outline",
       screen: "Settings",
