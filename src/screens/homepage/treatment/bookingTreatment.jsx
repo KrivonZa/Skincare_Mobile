@@ -21,7 +21,7 @@ export function BookingTreatment({ route }) {
   const scrollY = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    navigation.setOptions({ title: treatment.serviceName || treatment.title });
+    navigation.setOptions({ title: treatment.serviceName });
   }, []);
 
   // Calculate parallax effect for the header image
@@ -57,22 +57,20 @@ export function BookingTreatment({ route }) {
         {/* Main Content */}
         <View style={styles.content}>
           <View style={styles.infoContainer}>
-            <Text style={styles.title}>
-              {treatment.serviceName || treatment.title}
-            </Text>
+            <Text style={styles.title}>{treatment.serviceName}</Text>
             <Text style={styles.description}>{treatment.description}</Text>
 
             <View style={styles.priceContainer}>
               <Ionicons name="pricetag-outline" size={24} color="#F06B7E" />
-              <Text style={styles.priceText}>{treatment.price}</Text>
+              <Text style={styles.priceText}>${treatment.price}</Text>
             </View>
 
             <View style={styles.section}>
               <Text style={styles.sectionTitle}>Service Details</Text>
               <Text style={styles.sectionText}>
-                Our {treatment.serviceName || treatment.title} treatment is
-                performed by certified professionals using premium products.
-                Each session is customized to your specific skin needs.
+                Our {treatment.serviceName} treatment is performed by certified
+                professionals using premium products. Each session is customized
+                to your specific skin needs.
               </Text>
             </View>
 
@@ -90,11 +88,11 @@ export function BookingTreatment({ route }) {
               onPress={() =>
                 navigation.navigate("BookingDetail", {
                   appointment: {
-                    service: treatment.serviceName || treatment.title,
-                    price: treatment.price.replace(/[^0-9.]/g, ""),
+                    service: treatment.serviceName,
+                    price: treatment.price,
                     date: "Select date",
                     time: "Select time",
-                    duration: treatment.time || "60 Minutes",
+                    duration: treatment.time || "90 Minutes",
                     status: "New Booking",
                   },
                 })
