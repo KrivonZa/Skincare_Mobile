@@ -2,6 +2,7 @@ import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
 import { AuthNavigation } from "./authNavigation";
 import { HomeNavigation } from "./homeNavigation";
+import { TherapistNavigation } from "./therapistNavigation";
 import { ProfileNavigation } from "./profileNavigation";
 
 const Stack = createStackNavigator();
@@ -22,7 +23,7 @@ export function AppRouter() {
         />
         <Stack.Screen
           name="Home"
-          component={HomeNavigation}
+          component={TherapistNavigation}
           options={{ headerShown: false }}
         />
         <Stack.Screen
