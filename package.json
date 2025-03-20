@@ -20,7 +20,8 @@
     "react": "18.3.1",
     "react-native": "^0.76.7",
     "react-native-gesture-handler": "~2.20.2",
-    "skincare-mobile": "file:"
+    "skincare-mobile": "file:",
+    "expo-linear-gradient": "~14.0.2"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0"
