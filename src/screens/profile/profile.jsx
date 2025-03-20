@@ -40,10 +40,22 @@ import {
 import { useState, useEffect, useRef } from "react";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export function Profile() {
   const navigation = useNavigation();
 
+  const logout = async () => {
+    try {
+      await AsyncStorage.removeItem('accessToken');
+      navigation.reset({
+        index: 0,
+        routes: [{ name: "Auth", params: { screen: "Login" } }],
+      });
+    } catch (error) {
+      console.error('Logout failed:', error);
+    }
+  };
   const menuItems = [
     {
       title: "Skin Profile",
@@ -99,7 +111,13 @@ export function Profile() {
             <TouchableOpacity
               key={index}
               style={styles.menuItem}
-              onPress={() => navigation.navigate(item.screen)}
+              onPress={() => {
+                if (item.title === "Logout") {
+                  logout(); 
+                } else {
+                  navigation.navigate(item.screen); 
+                }
+              }}
             >
               <View style={styles.menuItemLeft}>
                 <Ionicons name={item.icon} size={24} color="#333" />
