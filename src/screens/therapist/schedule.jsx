@@ -11,13 +11,15 @@ import { Ionicons } from "@expo/vector-icons";
 import { Calendar as RNCalendar } from "react-native-calendars";
 import { useNavigation } from "@react-navigation/native";
 import api from "../../hooks/axiosInstance";
+import { useAuth } from "../../context/AuthContext";
 
 export function Schedule() {
     const navigation = useNavigation();
     const [events, setEvents] = useState([]); // Sự kiện/shift cho ngày được chọn
     const [monthEvents, setMonthEvents] = useState([]); // Sự kiện/shift cho cả tháng
     const [viewMode, setViewMode] = useState("day");
-    const [selectedDate, setSelectedDate] = useState(new Date("2025-03-21"));
+    const [selectedDate, setSelectedDate] = useState(new Date());
+    const { user } = useAuth();
 
     const timeSlots = [
         { id: 1, start: "07:30", end: "09:00" },
@@ -31,7 +33,7 @@ export function Schedule() {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const response = await api.get("/shifts/account/upcoming/67d419c6e7d3a3ce3609e801");
+                const response = await api.get(`/shifts/account/upcoming/${user._id}`);
                 const shifts = response.data;
 
                 // Lấy sự kiện cho cả tháng
@@ -62,10 +64,10 @@ export function Schedule() {
                 });
                 setEvents(dayShifts);
 
-                console.log("Month shifts:", monthShifts);
-                console.log("Day shifts:", dayShifts);
+                // console.log("Month shifts:", monthShifts);
+                // console.log("Day shifts:", dayShifts);
             } catch (error) {
-                console.error("Error fetching data:", error);
+                // console.error("Error fetching data:", error);
             }
         };
 
@@ -88,10 +90,10 @@ export function Schedule() {
                 const shiftDate = new Date(shift.date);
                 const shiftStartTime = shift.slotsId.startTime.split(":");
                 const shiftEndTime = shift.slotsId.endTime.split(":");
-                
+
                 const shiftStart = new Date(shiftDate);
                 shiftStart.setHours(parseInt(shiftStartTime[0]), parseInt(shiftStartTime[1]), 0, 0);
-                
+
                 const shiftEnd = new Date(shiftDate);
                 shiftEnd.setHours(parseInt(shiftEndTime[0]), parseInt(shiftEndTime[1]), 0, 0);
 
@@ -226,9 +228,8 @@ export function Schedule() {
                     style={styles.calendar}
                 />
                 <Text style={styles.weekHint}>
-                    {`Ngày ${selectedDate.toLocaleDateString("vi-VN")}: ${
-                        busyCountPerDay[selectedDateStr] || 0
-                    } slot bận`}
+                    {`Ngày ${selectedDate.toLocaleDateString("vi-VN")}: ${busyCountPerDay[selectedDateStr] || 0
+                        } slot bận`}
                 </Text>
             </View>
         );
