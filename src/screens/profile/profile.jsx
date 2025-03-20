@@ -48,6 +48,7 @@ export function Profile() {
   const logout = async () => {
     try {
       await AsyncStorage.removeItem('accessToken');
+      await AsyncStorage.removeItem('user');
       navigation.reset({
         index: 0,
         routes: [{ name: "Auth", params: { screen: "Login" } }],

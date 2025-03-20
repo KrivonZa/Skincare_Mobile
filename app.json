@@ -25,10 +25,13 @@
         "foregroundImage": "./assets/Skincare-Logo.png",
         "backgroundColor": "#ffffff"
       },
-      "permissions": [] 
+      "permissions": []
     },
     "web": {
       "favicon": "./assets/Skincare-Logo.png"
+    },
+    "packagerOpts": {
+      "port": 8081
     }
   }
 }
