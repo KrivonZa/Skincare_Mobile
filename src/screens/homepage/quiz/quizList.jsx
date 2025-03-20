@@ -16,39 +16,99 @@ export function QuizStatus() {
   const navigation = useNavigation();
   const [quizzes, setQuizzes] = useState([]);
   const [scoreBands, setScoreBands] = useState([]);
+  const [roadmaps, setRoadmaps] = useState([]);
+  const [services, setServices] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedAnswers, setSelectedAnswers] = useState({});
   const [modalVisible, setModalVisible] = useState(false);
   const [quizResult, setQuizResult] = useState(null);
 
-  // Lấy dữ liệu câu hỏi và scoreband từ API
+  // Lấy dữ liệu từ API
   useEffect(() => {
     const fetchData = async () => {
       try {
         const token = await AsyncStorage.getItem("accessToken");
+        console.log("Access Token:", token);
 
         // Lấy danh sách câu hỏi
-        const quizResponse = await api.get("/question", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        const formattedQuizzes = quizResponse.data.map((quiz) => ({
-          id: quiz._id,
-          title: quiz.title || "Untitled Quiz",
-          answers: quiz.answers || [],
-        }));
-        setQuizzes(formattedQuizzes);
+        console.log("Fetching /question...");
+        try {
+          const quizResponse = await api.get("/question", {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          console.log("Questions:", quizResponse.data);
+          const formattedQuizzes = quizResponse.data.map((quiz) => ({
+            id: quiz._id,
+            title: quiz.title || "Untitled Quiz",
+            answers: quiz.answers || [],
+          }));
+          setQuizzes(formattedQuizzes);
+        } catch (err) {
+          console.error(
+            "Error fetching /question:",
+            err.response?.status,
+            err.response?.data
+          );
+        }
 
         // Lấy danh sách scoreband
-        const scoreBandResponse = await api.get("/scoreband", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        setScoreBands(scoreBandResponse.data);
+        console.log("Fetching /scoreband...");
+        try {
+          const scoreBandResponse = await api.get("/scoreband", {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          console.log("ScoreBands:", scoreBandResponse.data);
+          setScoreBands(scoreBandResponse.data);
+        } catch (err) {
+          console.error(
+            "Error fetching /scoreband:",
+            err.response?.status,
+            err.response?.data
+          );
+        }
 
-        setSelectedAnswers({}); // Reset câu trả lời mỗi khi vào trang
+        // Lấy danh sách roadmap
+        console.log("Fetching /roadmap...");
+        try {
+          const roadmapResponse = await api.get("/roadmap", {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          console.log("Roadmaps:", roadmapResponse.data);
+          setRoadmaps(roadmapResponse.data);
+        } catch (err) {
+          console.error(
+            "Error fetching /roadmap:",
+            err.response?.status,
+            err.response?.data
+          );
+        }
+
+        // Lấy danh sách service
+        console.log("Fetching /service...");
+        try {
+          const serviceResponse = await api.get("/service", {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          console.log("Services:", serviceResponse.data);
+          setServices(serviceResponse.data);
+        } catch (err) {
+          console.error(
+            "Error fetching /service:",
+            err.response?.status,
+            err.response?.data
+          );
+          setServices([]);
+        }
+
+        setSelectedAnswers({});
       } catch (err) {
+        console.error(
+          "General error:",
+          err.response?.status,
+          err.response?.data
+        );
         setError(err.message);
-        console.error("Failed to fetch data: ", err);
       } finally {
         setLoading(false);
       }
@@ -68,36 +128,57 @@ export function QuizStatus() {
 
   // Xử lý khi nhấn nút Submit
   const handleSubmit = () => {
-    // Kiểm tra nếu tất cả câu hỏi đã được trả lời
     if (Object.keys(selectedAnswers).length !== quizzes.length) {
       alert("Please answer all questions before submitting.");
       return;
     }
-
-    // Tính tổng điểm và kiểm tra scoreband
     checkScoreBand(selectedAnswers);
   };
 
-  // Kiểm tra totalScore với scoreband
+  // Kiểm tra totalScore với scoreband và tìm roadmap
   const checkScoreBand = (answers) => {
     const totalScore = Object.values(answers).reduce(
       (sum, answer) => sum + answer.point,
       0
     );
 
-    // Tìm scoreband phù hợp
     const matchedBand = scoreBands.find(
       (band) => totalScore >= band.minPoint && totalScore <= band.maxPoint
     );
 
     if (matchedBand) {
-      const result = {
-        totalScore,
-        typeOfSkin: matchedBand.typeOfSkin,
-        skinExplanation: matchedBand.skinExplanation,
-      };
-      setQuizResult(result);
-      setModalVisible(true); // Hiển thị modal khi có kết quả
+      const matchedRoadmap = roadmaps.find(
+        (roadmap) => roadmap._id.$oid === matchedBand.roadmapId.$oid
+      );
+
+      if (matchedRoadmap) {
+        // Lấy danh sách service từ serviceId trong roadmap
+        const roadmapServices = matchedRoadmap.serviceId
+          .map((serviceId) =>
+            services.find((service) => service._id.$oid === serviceId.$oid)
+          )
+          .filter((service) => service);
+
+        // Log để kiểm tra roadmapServices
+        console.log("Matched Roadmap:", matchedRoadmap);
+        console.log("Service IDs in Roadmap:", matchedRoadmap.serviceId);
+        console.log("Roadmap Services:", roadmapServices);
+        console.log(
+          "Roadmap Service Names:",
+          roadmapServices.map((service) => service.serviceName)
+        );
+
+        const result = {
+          totalScore,
+          typeOfSkin: matchedBand.typeOfSkin,
+          skinExplanation: matchedBand.skinExplanation,
+          roadmapServices,
+        };
+        setQuizResult(result);
+        setModalVisible(true);
+      } else {
+        alert("No matching roadmap found for your score band.");
+      }
     } else {
       alert("No matching score band found for your score.");
     }
@@ -117,7 +198,6 @@ export function QuizStatus() {
           onPress={() => handleAnswerSelect(quiz.id, answer)}
         >
           <Text style={styles.answerText}>{answer.title}</Text>
-          {/* Bỏ hiển thị điểm số */}
         </TouchableOpacity>
       ))}
     </View>
@@ -144,13 +224,11 @@ export function QuizStatus() {
       <Text style={styles.header}>Skin Quiz</Text>
       <ScrollView style={styles.list}>
         {quizzes.map((quiz) => renderQuiz(quiz))}
-        {/* Nút Submit */}
         <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
           <Text style={styles.submitButtonText}>Submit</Text>
         </TouchableOpacity>
       </ScrollView>
 
-      {/* Modal hiển thị kết quả */}
       <Modal
         animationType="fade"
         transparent={true}
@@ -171,16 +249,29 @@ export function QuizStatus() {
                 <Text style={styles.modalText}>
                   Explanation: {quizResult.skinExplanation}
                 </Text>
+                {quizResult.roadmapServices.length === 0 && (
+                  <Text style={styles.modalText}>
+                    No services available for your roadmap at the moment.
+                  </Text>
+                )}
               </>
             )}
             <TouchableOpacity
-              style={styles.closeButton}
+              style={[
+                styles.roadmapButton,
+                quizResult?.roadmapServices.length === 0 &&
+                  styles.disabledButton,
+              ]}
               onPress={() => {
+                if (quizResult?.roadmapServices.length === 0) return;
                 setModalVisible(false);
-                navigation.navigate("LandingPage"); // Điều hướng đến LandingPage
+                navigation.navigate("RoadmapScreen", {
+                  services: quizResult?.roadmapServices || [],
+                });
               }}
+              disabled={quizResult?.roadmapServices.length === 0}
             >
-              <Text style={styles.closeButtonText}>Close</Text>
+              <Text style={styles.roadmapButtonText}>Your Road Map</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -280,14 +371,17 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     textAlign: "center",
   },
-  closeButton: {
+  roadmapButton: {
     marginTop: 20,
     backgroundColor: "#F07D87",
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 6,
   },
-  closeButtonText: {
+  disabledButton: {
+    backgroundColor: "#CCCCCC",
+  },
+  roadmapButtonText: {
     color: "#FFF",
     fontSize: 16,
     fontWeight: "600",

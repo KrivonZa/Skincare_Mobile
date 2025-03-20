@@ -11,6 +11,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { TreatmentNavigation, BookingNavigation } from "./homeRoute";
 import { QuizNavigation } from "./homeRoute/quizNavigation"; // Named import
+import { RoadmapScreen } from "../screens/homepage/roadmap/roadMapScreen";
 
 const Drawer = createDrawerNavigator();
 const Home = createStackNavigator();
@@ -115,6 +116,11 @@ export function HomeNavigation() {
       <Home.Screen
         name="BookingTreatment"
         component={BookingTreatment}
+        options={{ title: "Booking Service", headerShown: true }}
+      />
+      <Home.Screen
+        name="RoadmapScreen"
+        component={RoadmapScreen}
         options={{ title: "Booking Service", headerShown: true }}
       />
     </Home.Navigator>

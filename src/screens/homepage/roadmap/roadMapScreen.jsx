@@ -10,8 +10,15 @@ import {
 import { useNavigation } from "@react-navigation/native";
 
 export function RoadmapScreen({ route }) {
-  const { services } = route.params; // Nhận danh sách service từ QuizStatus
+  const { services } = route.params;
   const navigation = useNavigation();
+
+  // Log để kiểm tra services nhận được
+  console.log("Services in RoadmapScreen:", services);
+  console.log(
+    "Service Names in RoadmapScreen:",
+    services.map((service) => service.serviceName)
+  );
 
   return (
     <SafeAreaView style={styles.container}>
@@ -24,7 +31,7 @@ export function RoadmapScreen({ route }) {
               <View style={styles.stepCircle}>
                 <Text style={styles.stepNumber}>{index + 1}</Text>
               </View>
-              {index < services.length - 1 && <View style={styles.stepLine} />}
+              {index < services.length && <View style={styles.stepLine} />}
             </View>
 
             {/* Service Card */}
