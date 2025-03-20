@@ -8,39 +8,59 @@ import {
   Dimensions,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
+import { useEffect, useState } from "react";
+import api from "../../hooks/axiosInstance";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const screenWidth = Dimensions.get("window").width;
 
+
 // Dữ liệu mẫu
-const treatmentData = [
-  {
-    id: "1",
-    title: "Dermabrasion",
-    description:
-      "This is a surgical procedure that uses a rotating instrument to remove the outer layers of skin, usually on the face.",
-    image:
-      "https://s3-alpha-sig.figma.com/img/5248/de06/7c67a715bd33a9ac75f58db3823815bd?Expires=1739750400&Key-Pair-Id=APKAQ4GOSFWCW27IBOMQ&Signature=Tpd4X7xJuWxk5Rmg-lROfQz34FSFYXFx6XRJWQ8QZxF9jS9dMPt~ed1uRySvYyyWDUAlbcEYhx-xn5qSJs2uEIwOGJDrgbfEG8GAt2QhKyyBOJvEplPwyRNKrdseMLrO4yjGHj2ZH3gGbfgtrv7aDEktf~EFw4O~M11fw6uSZibEPwZQj1zZWJxFkBlk6ooG-n-1fT29p14OHkhrsiREz1lITY52KmKoYL~4meeTIcviOcykfezCF47a-xB7GbbHF58~48BR~DHbWm985VoxvEmZaDTtnJeZWQMxYyMZ1aOK14OHxP760hFMk2B9jMDGLG5K89IXpzK2arW05A3H9g__",
-  },
-  {
-    id: "2",
-    title: "Facial Mask Lightening",
-    description:
-      "This is a surgical procedure to treat scars and winkles. Doctors perform it in an office or clinic. You will have a local anesthetic...",
-    image:
-      "https://s3-alpha-sig.figma.com/img/5248/de06/7c67a715bd33a9ac75f58db3823815bd?Expires=1739750400&Key-Pair-Id=APKAQ4GOSFWCW27IBOMQ&Signature=Tpd4X7xJuWxk5Rmg-lROfQz34FSFYXFx6XRJWQ8QZxF9jS9dMPt~ed1uRySvYyyWDUAlbcEYhx-xn5qSJs2uEIwOGJDrgbfEG8GAt2QhKyyBOJvEplPwyRNKrdseMLrO4yjGHj2ZH3gGbfgtrv7aDEktf~EFw4O~M11fw6uSZibEPwZQj1zZWJxFkBlk6ooG-n-1fT29p14OHkhrsiREz1lITY52KmKoYL~4meeTIcviOcykfezCF47a-xB7GbbHF58~48BR~DHbWm985VoxvEmZaDTtnJeZWQMxYyMZ1aOK14OHxP760hFMk2B9jMDGLG5K89IXpzK2arW05A3H9g__",
-  },
-  {
-    id: "3",
-    title: "Ultrasonic Scrubbing",
-    description:
-      "This is a surgical procedure to treat scars and winkles. Doctors perform it in an office or clinic. You will have a local anesthetic...",
-    image:
-      "https://s3-alpha-sig.figma.com/img/5248/de06/7c67a715bd33a9ac75f58db3823815bd?Expires=1739750400&Key-Pair-Id=APKAQ4GOSFWCW27IBOMQ&Signature=Tpd4X7xJuWxk5Rmg-lROfQz34FSFYXFx6XRJWQ8QZxF9jS9dMPt~ed1uRySvYyyWDUAlbcEYhx-xn5qSJs2uEIwOGJDrgbfEG8GAt2QhKyyBOJvEplPwyRNKrdseMLrO4yjGHj2ZH3gGbfgtrv7aDEktf~EFw4O~M11fw6uSZibEPwZQj1zZWJxFkBlk6ooG-n-1fT29p14OHkhrsiREz1lITY52KmKoYL~4meeTIcviOcykfezCF47a-xB7GbbHF58~48BR~DHbWm985VoxvEmZaDTtnJeZWQMxYyMZ1aOK14OHxP760hFMk2B9jMDGLG5K89IXpzK2arW05A3H9g__",
-  },
-];
+// const treatmentData = [
+//   {
+//     id: "1",
+//     title: "Dermabrasion",
+//     description:
+//       "This is a surgical procedure that uses a rotating instrument to remove the outer layers of skin, usually on the face.",
+//     image:
+//       "https://s3-alpha-sig.figma.com/img/5248/de06/7c67a715bd33a9ac75f58db3823815bd?Expires=1739750400&Key-Pair-Id=APKAQ4GOSFWCW27IBOMQ&Signature=Tpd4X7xJuWxk5Rmg-lROfQz34FSFYXFx6XRJWQ8QZxF9jS9dMPt~ed1uRySvYyyWDUAlbcEYhx-xn5qSJs2uEIwOGJDrgbfEG8GAt2QhKyyBOJvEplPwyRNKrdseMLrO4yjGHj2ZH3gGbfgtrv7aDEktf~EFw4O~M11fw6uSZibEPwZQj1zZWJxFkBlk6ooG-n-1fT29p14OHkhrsiREz1lITY52KmKoYL~4meeTIcviOcykfezCF47a-xB7GbbHF58~48BR~DHbWm985VoxvEmZaDTtnJeZWQMxYyMZ1aOK14OHxP760hFMk2B9jMDGLG5K89IXpzK2arW05A3H9g__",
+//   },
+//   {
+//     id: "2",
+//     title: "Facial Mask Lightening",
+//     description:
+//       "This is a surgical procedure to treat scars and winkles. Doctors perform it in an office or clinic. You will have a local anesthetic...",
+//     image:
+//       "https://s3-alpha-sig.figma.com/img/5248/de06/7c67a715bd33a9ac75f58db3823815bd?Expires=1739750400&Key-Pair-Id=APKAQ4GOSFWCW27IBOMQ&Signature=Tpd4X7xJuWxk5Rmg-lROfQz34FSFYXFx6XRJWQ8QZxF9jS9dMPt~ed1uRySvYyyWDUAlbcEYhx-xn5qSJs2uEIwOGJDrgbfEG8GAt2QhKyyBOJvEplPwyRNKrdseMLrO4yjGHj2ZH3gGbfgtrv7aDEktf~EFw4O~M11fw6uSZibEPwZQj1zZWJxFkBlk6ooG-n-1fT29p14OHkhrsiREz1lITY52KmKoYL~4meeTIcviOcykfezCF47a-xB7GbbHF58~48BR~DHbWm985VoxvEmZaDTtnJeZWQMxYyMZ1aOK14OHxP760hFMk2B9jMDGLG5K89IXpzK2arW05A3H9g__",
+//   },
+//   {
+//     id: "3",
+//     title: "Ultrasonic Scrubbing",
+//     description:
+//       "This is a surgical procedure to treat scars and winkles. Doctors perform it in an office or clinic. You will have a local anesthetic...",
+//     image:
+//       "https://s3-alpha-sig.figma.com/img/5248/de06/7c67a715bd33a9ac75f58db3823815bd?Expires=1739750400&Key-Pair-Id=APKAQ4GOSFWCW27IBOMQ&Signature=Tpd4X7xJuWxk5Rmg-lROfQz34FSFYXFx6XRJWQ8QZxF9jS9dMPt~ed1uRySvYyyWDUAlbcEYhx-xn5qSJs2uEIwOGJDrgbfEG8GAt2QhKyyBOJvEplPwyRNKrdseMLrO4yjGHj2ZH3gGbfgtrv7aDEktf~EFw4O~M11fw6uSZibEPwZQj1zZWJxFkBlk6ooG-n-1fT29p14OHkhrsiREz1lITY52KmKoYL~4meeTIcviOcykfezCF47a-xB7GbbHF58~48BR~DHbWm985VoxvEmZaDTtnJeZWQMxYyMZ1aOK14OHxP760hFMk2B9jMDGLG5K89IXpzK2arW05A3H9g__",
+//   },
+// ];
+
+
 
 export function Treatment() {
   const navigation = useNavigation();
+  const [treatmentData, setTreatmentData] = useState([]);
+  useEffect(() => {
+    const fetchTreatmentData = async () => {
+      try {
+        const response = await api.get("/service", {
+         Authorization: `Bearer ${AsyncStorage.getItem("accessToken")}`,
+        });
+        setTreatmentData(response.data);
+      } catch (error) {
+        console.error("Failed to fetch treatment data: ", error);
+      }
+    }
+  fetchTreatmentData();
+  },[]);
 
   const renderItem = ({ item }) => (
     <View style={styles.treatmentCard}>
@@ -50,7 +70,7 @@ export function Treatment() {
         resizeMode="cover"
       />
       <View style={styles.cardContent}>
-        <Text style={styles.cardTitle}>{item.title}</Text>
+        <Text style={styles.cardTitle}>{item.serviceName}</Text>
         <Text style={styles.cardDescription}>{item.description}</Text>
         <TouchableOpacity
           style={styles.cardButton}
