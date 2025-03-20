@@ -10,6 +10,7 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { TreatmentNavigation, BookingNavigation } from "./homeRoute";
+import { QuizNavigation } from "./homeRoute/quizNavigation"; // Named import
 
 const Drawer = createDrawerNavigator();
 const Home = createStackNavigator();
@@ -72,6 +73,16 @@ function DrawerNavigation() {
           title: "Booking Schedule",
           drawerIcon: ({ color, size }) => (
             <Ionicons name="calendar-outline" size={size} color={color} />
+          ),
+        }}
+      />
+      <Drawer.Screen
+        name="Quiz"
+        component={QuizNavigation}
+        options={{
+          title: "Quiz",
+          drawerIcon: ({ color, size }) => (
+            <Ionicons name="school-outline" size={size} color={color} />
           ),
         }}
       />
