@@ -13,7 +13,7 @@ import {
 import { useEffect, useRef, useState } from "react";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import api from "../../hooks/axiosInstance";
 
 const { height } = Dimensions.get("window");
@@ -21,8 +21,8 @@ const { height } = Dimensions.get("window");
 export function Login() {
   const translateY = useRef(new Animated.Value(height)).current;
   const [passwordVisible, setPasswordVisible] = useState(false);
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const navigation = useNavigation();
 
@@ -37,20 +37,20 @@ export function Login() {
     try {
       setIsLoading(true);
 
-      const response = await api.post('/account/login', {
+      const response = await api.post("/account/login", {
         email,
         password,
       });
       const token = response.data.token;
-      await AsyncStorage.setItem('accessToken', token);
-      await AsyncStorage.setItem('user', response.data);
+      await AsyncStorage.setItem("accessToken", token);
+      await AsyncStorage.setItem("user", JSON.stringify(response.data));
       navigation.navigate("Home");
-
     } catch (error) {
-      const errorMessage = error.response?.data?.message ||
+      const errorMessage =
+        error.response?.data?.message ||
         error.message ||
-        'Something went wrong';
-      Alert.alert('Login Error', errorMessage);
+        "Something went wrong";
+      Alert.alert("Login Error", errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -105,7 +105,7 @@ export function Login() {
           disabled={isLoading}
         >
           <Text style={styles.loginButtonText}>
-            {isLoading ? 'Logging in...' : 'Login'}
+            {isLoading ? "Logging in..." : "Login"}
           </Text>
         </TouchableOpacity>
 
