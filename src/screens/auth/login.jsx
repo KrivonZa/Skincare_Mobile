@@ -8,16 +8,22 @@ import {
   TextInput,
   Text,
   TouchableOpacity,
+  Alert,
 } from "react-native";
 import { useEffect, useRef, useState } from "react";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import api from "../../hooks/axiosInstance";
 
 const { height } = Dimensions.get("window");
 
 export function Login() {
   const translateY = useRef(new Animated.Value(height)).current;
   const [passwordVisible, setPasswordVisible] = useState(false);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
   const navigation = useNavigation();
 
   useEffect(() => {
@@ -26,6 +32,28 @@ export function Login() {
       useNativeDriver: true,
     }).start();
   }, []);
+
+  const handleLogin = async () => {
+    try {
+      setIsLoading(true);
+
+      const response = await api.post('/account/login', {
+        email,
+        password,
+      });
+      const token = response.data.token;
+      await AsyncStorage.setItem('userToken', token);
+      navigation.navigate("Home");
+
+    } catch (error) {
+      const errorMessage = error.response?.data?.message ||
+        error.message ||
+        'Something went wrong';
+      Alert.alert('Login Error', errorMessage);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -45,17 +73,19 @@ export function Login() {
           placeholder="Email"
           placeholderTextColor="#a1a1a1"
           keyboardType="email-address"
+          value={email}
+          onChangeText={setEmail}
+          autoCapitalize="none"
         />
 
         <View style={styles.passwordContainer}>
           <TextInput
-            style={[
-              styles.input,
-              { flex: 1, marginBottom: 0 },
-            ]}
+            style={[styles.input, { flex: 1, marginBottom: 0 }]}
             placeholder="Password"
             placeholderTextColor="#a1a1a1"
             secureTextEntry={!passwordVisible}
+            value={password}
+            onChangeText={setPassword}
           />
           <TouchableOpacity
             onPress={() => setPasswordVisible(!passwordVisible)}
@@ -68,8 +98,14 @@ export function Login() {
           </TouchableOpacity>
         </View>
 
-        <TouchableOpacity style={styles.loginButton} onPress={() => navigation.navigate("Home")}>
-          <Text style={styles.loginButtonText}>Login</Text>
+        <TouchableOpacity
+          style={[styles.loginButton, isLoading && { opacity: 0.7 }]}
+          onPress={handleLogin}
+          disabled={isLoading}
+        >
+          <Text style={styles.loginButtonText}>
+            {isLoading ? 'Logging in...' : 'Login'}
+          </Text>
         </TouchableOpacity>
 
         <View style={styles.registerContainer}>
