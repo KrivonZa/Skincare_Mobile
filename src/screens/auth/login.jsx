@@ -43,7 +43,7 @@ export function Login() {
       });
       const token = response.data.token;
       await AsyncStorage.setItem('accessToken', token);
-      await AsyncStorage.setItem('user', response.data);
+      await AsyncStorage.setItem("user", JSON.stringify(response.data));
       navigation.navigate("Home");
 
     } catch (error) {
