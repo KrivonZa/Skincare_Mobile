@@ -7,12 +7,26 @@ import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { ScheduleNavigation, AppointmentNavigation } from "./therapistRoute";
 import { AuthNavigation } from "./authNavigation";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useAuth } from "../context/AuthContext";
 
 const Drawer = createDrawerNavigator();
 const Therapist = createStackNavigator();
 
 function DrawerNavigation() {
   const navigation = useNavigation();
+  const { logout } = useAuth();
+  const handleLogout = async () => {
+    try {
+      await logout();
+      navigation.reset({
+        index: 0,
+        routes: [{ name: "Auth", params: { screen: "Login" } }],
+      });
+    } catch (error) {
+      console.error("Logout failed:", error);
+    }
+  };
   return (
     <Drawer.Navigator
       initialRouteName="ScheduleNavigation"
@@ -75,10 +89,7 @@ function DrawerNavigation() {
         listeners={{
           drawerItemPress: (e) => {
             e.preventDefault(); // Ngăn chuyển sang AuthNavigation trực tiếp
-            navigation.reset({
-              index: 0,
-              routes: [{ name: "Auth" }],
-            });
+            handleLogout();
           },
         }}
         options={{

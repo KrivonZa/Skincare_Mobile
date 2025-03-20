@@ -16,61 +16,81 @@ export const AuthProvider = ({ children }) => {
       const accessToken = await AsyncStorage.getItem("accessToken");
 
       if (accessToken) {
-        // Decode token
         const decodedToken = jwtDecode.jwtDecode(accessToken);
+        const currentTime = Date.now() / 1000;
 
-        // Kiểm tra token có hợp lệ không (thời gian hết hạn)
-        const currentTime = Date.now() / 1000; // Chuyển sang giây
         if (decodedToken.exp && decodedToken.exp < currentTime) {
-          // Token hết hạn
           await AsyncStorage.removeItem("accessToken");
           setUser(null);
         } else {
-          // Token còn hạn
           setUser(decodedToken);
         }
       } else {
-        // Không có token
-        setUser(null); // Đảm bảo user là null khi không có token
+        setUser(null);
       }
     } catch (error) {
       console.error("Error checking auth status:", error);
-      setUser(null); // Xử lý lỗi bằng cách đặt user về null
+      setUser(null);
     } finally {
       setLoading(false);
     }
   };
 
-  // Effect để chạy khi component mount
+  // Hàm đăng nhập
+  const login = async (token) => {
+    try {
+      setLoading(true);
+      await AsyncStorage.setItem("accessToken", token);
+      const decodedToken = jwtDecode.jwtDecode(token);
+      setUser(decodedToken);
+    } catch (error) {
+      console.error("Login failed:", error);
+      setUser(null);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Hàm đăng xuất
+  const logout = async () => {
+    try {
+      setLoading(true);
+      await AsyncStorage.removeItem("accessToken");
+      setUser(null); // Đặt user về null ngay lập tức
+    } catch (error) {
+      console.error("Logout failed:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Effect để kiểm tra khi mount
   useEffect(() => {
     checkAuthStatus();
 
-    // Tự động kiểm tra định kỳ (mỗi 5 phút)
     const interval = setInterval(() => {
       checkAuthStatus();
-    }, 5 * 60 * 1000); // 5 phút
+    }, 5 * 60 * 1000);
 
-    // Cleanup interval khi component unmount
     return () => clearInterval(interval);
   }, []);
 
-  // Thêm hàm thủ công để kiểm tra lại khi cần
-  const refreshAuthStatus = () => {
-    setLoading(true);
-    checkAuthStatus();
-  };
-
-  // Giá trị context cung cấp cho các component con
+  // Giá trị context
   const value = {
     user,
     loading,
-    refreshAuthStatus, // Thêm hàm này để component con có thể gọi khi cần
+    login,
+    logout,
+    refreshAuthStatus: () => {
+      setLoading(true);
+      checkAuthStatus();
+    },
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 
-// Custom hook để sử dụng AuthContext
+// Custom hook
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {

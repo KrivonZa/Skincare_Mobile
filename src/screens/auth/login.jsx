@@ -15,6 +15,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import api from "../../hooks/axiosInstance";
+import { useAuth } from "../../context/AuthContext";
 
 const { height } = Dimensions.get("window");
 
@@ -25,6 +26,7 @@ export function Login() {
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const navigation = useNavigation();
+  const { login } = useAuth();
 
   useEffect(() => {
     Animated.timing(translateY, {
@@ -37,19 +39,20 @@ export function Login() {
     try {
       setIsLoading(true);
 
-      const response = await api.post('/account/login', {
+      // Gọi API để lấy token
+      const response = await api.post("/account/login", {
         email,
         password,
       });
       const token = response.data.token;
-      await AsyncStorage.setItem('accessToken', token);
-      navigation.navigate("Home");
-
+      await login(token);
+      navigation.navigate("Main");
     } catch (error) {
-      const errorMessage = error.response?.data?.message ||
+      const errorMessage =
+        error.response?.data?.message ||
         error.message ||
-        'Something went wrong';
-      Alert.alert('Login Error', errorMessage);
+        "Something went wrong";
+      Alert.alert("Login Error", errorMessage);
     } finally {
       setIsLoading(false);
     }

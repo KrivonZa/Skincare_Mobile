@@ -15,8 +15,8 @@ import { useAuth } from "../../context/AuthContext";
 
 export function Schedule() {
     const navigation = useNavigation();
-    const [events, setEvents] = useState([]); // Sự kiện/shift cho ngày được chọn
-    const [monthEvents, setMonthEvents] = useState([]); // Sự kiện/shift cho cả tháng
+    const [events, setEvents] = useState([]); // Events/shifts for the selected day
+    const [monthEvents, setMonthEvents] = useState([]); // Events/shifts for the whole month
     const [viewMode, setViewMode] = useState("day");
     const [selectedDate, setSelectedDate] = useState(new Date());
     const { user } = useAuth();
@@ -36,7 +36,7 @@ export function Schedule() {
                 const response = await api.get(`/shifts/account/upcoming/${user._id}`);
                 const shifts = response.data;
 
-                // Lấy sự kiện cho cả tháng
+                // Get events for the whole month
                 const startOfMonth = new Date(selectedDate);
                 startOfMonth.setDate(1);
                 startOfMonth.setHours(0, 0, 0, 0);
@@ -52,7 +52,7 @@ export function Schedule() {
                 });
                 setMonthEvents(monthShifts);
 
-                // Lấy sự kiện cho ngày được chọn
+                // Get events for the selected day
                 const startOfDay = new Date(selectedDate);
                 startOfDay.setHours(0, 0, 0, 0);
                 const endOfDay = new Date(selectedDate);
@@ -133,7 +133,7 @@ export function Schedule() {
                         <Ionicons name="chevron-back" size={28} color="#fff" />
                     </TouchableOpacity>
                     <Text style={styles.dateText}>
-                        {selectedDate.toLocaleDateString("vi-VN", {
+                        {selectedDate.toLocaleDateString("en-US", {
                             weekday: "long",
                             day: "numeric",
                             month: "long",
@@ -168,8 +168,8 @@ export function Schedule() {
                             </View>
                             <Text style={styles.slotStatus}>
                                 {item.isBusy
-                                    ? item.event?.slotsId?.startTime + " - " + item.event?.slotsId?.endTime // Hiển thị thời gian shift
-                                    : "Trống"}
+                                    ? item.event?.appointmentId?.serviceId?.serviceName
+                                    : "Empty"}
                             </Text>
                         </TouchableOpacity>
                     )}
@@ -201,7 +201,7 @@ export function Schedule() {
         markedDates[selectedDateStr] = {
             ...markedDates[selectedDateStr],
             selected: true,
-            selectedColor: "#007AFF",
+            selectedColor: "#ff909a",
         };
 
         return (
@@ -218,18 +218,17 @@ export function Schedule() {
                         backgroundColor: "#fff",
                         calendarBackground: "#fff",
                         textSectionTitleColor: "#333",
-                        selectedDayBackgroundColor: "#007AFF",
+                        selectedDayBackgroundColor: "#ff909a",
                         selectedDayTextColor: "#fff",
                         todayTextColor: "#00adf5",
                         dayTextColor: "#333",
                         textDisabledColor: "#d9e1e8",
-                        arrowColor: "#007AFF",
+                        arrowColor: "#ff909a",
                     }}
                     style={styles.calendar}
                 />
                 <Text style={styles.weekHint}>
-                    {`Ngày ${selectedDate.toLocaleDateString("vi-VN")}: ${busyCountPerDay[selectedDateStr] || 0
-                        } slot bận`}
+                    {`Date ${selectedDate.toLocaleDateString("en-US")}: ${busyCountPerDay[selectedDateStr] || 0} busy slots`}
                 </Text>
             </View>
         );
@@ -245,7 +244,7 @@ export function Schedule() {
                     ]}
                     onPress={() => setViewMode("day")}
                 >
-                    <Text style={styles.buttonText}>Theo ngày</Text>
+                    <Text style={styles.buttonText}>By Day</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                     style={[
@@ -254,7 +253,7 @@ export function Schedule() {
                     ]}
                     onPress={() => setViewMode("week")}
                 >
-                    <Text style={styles.buttonText}>Theo tuần</Text>
+                    <Text style={styles.buttonText}>By Week</Text>
                 </TouchableOpacity>
             </View>
             {viewMode === "day" ? renderDayView() : renderWeekView()}
@@ -280,7 +279,7 @@ const styles = StyleSheet.create({
         marginHorizontal: 10,
     },
     activeButton: {
-        backgroundColor: "#007AFF",
+        backgroundColor: "#ff909a",
     },
     buttonText: {
         color: "#fff",
@@ -295,7 +294,7 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         justifyContent: "space-between",
         alignItems: "center",
-        backgroundColor: "#007AFF",
+        backgroundColor: "#ff909a",
         padding: 15,
         borderRadius: 10,
         marginBottom: 20,
@@ -320,10 +319,10 @@ const styles = StyleSheet.create({
         elevation: 3,
     },
     busySlot: {
-        backgroundColor: "#FF5555",
+        backgroundColor: "#ff6f61",
     },
     freeSlot: {
-        backgroundColor: "#55FF55",
+        backgroundColor: "#b7b7b7",
     },
     slotTimeContainer: {
         alignItems: "flex-start",
