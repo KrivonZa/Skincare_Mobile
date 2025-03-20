@@ -42,7 +42,7 @@ export function Login() {
         password,
       });
       const token = response.data.token;
-      await AsyncStorage.setItem('userToken', token);
+      await AsyncStorage.setItem('accessToken', token);
       navigation.navigate("Home");
 
     } catch (error) {
