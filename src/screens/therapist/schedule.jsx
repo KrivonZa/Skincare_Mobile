@@ -7,15 +7,15 @@ import {
     FlatList,
 } from "react-native";
 import { useState, useEffect } from "react";
-import * as Calendar from "expo-calendar";
 import { Ionicons } from "@expo/vector-icons";
 import { Calendar as RNCalendar } from "react-native-calendars";
 import { useNavigation } from "@react-navigation/native";
+import api from "../../hooks/axiosInstance";
 
 export function Schedule() {
     const navigation = useNavigation();
-    const [events, setEvents] = useState([]); // Sự kiện cho ngày được chọn
-    const [monthEvents, setMonthEvents] = useState([]); // Sự kiện cho cả tháng
+    const [events, setEvents] = useState([]); // Sự kiện/shift cho ngày được chọn
+    const [monthEvents, setMonthEvents] = useState([]); // Sự kiện/shift cho cả tháng
     const [viewMode, setViewMode] = useState("day");
     const [selectedDate, setSelectedDate] = useState(new Date("2025-03-21"));
 
@@ -29,131 +29,47 @@ export function Schedule() {
     ];
 
     useEffect(() => {
-        (async () => {
-            const { status } = await Calendar.requestCalendarPermissionsAsync();
-            if (status !== "granted") {
-                console.log("Calendar permission denied");
-                return;
-            }
+        const fetchData = async () => {
+            try {
+                const response = await api.get("/shifts/account/upcoming/67d419c6e7d3a3ce3609e801");
+                const shifts = response.data;
 
-            let calendars = await Calendar.getCalendarsAsync(Calendar.EntityTypes.EVENT);
-            console.log("Calendars:", calendars);
+                // Lấy sự kiện cho cả tháng
+                const startOfMonth = new Date(selectedDate);
+                startOfMonth.setDate(1);
+                startOfMonth.setHours(0, 0, 0, 0);
 
-            let calendarId;
-            if (calendars.length === 0) {
-                console.log("No calendars found, creating a new one...");
-                calendarId = await Calendar.createCalendarAsync({
-                    title: "My App Calendar",
-                    color: "#007AFF",
-                    entityType: Calendar.EntityTypes.EVENT,
-                    source: {
-                        name: "My App Source",
-                        isLocalAccount: true,
-                    },
-                    name: "myAppCalendar",
-                    accessLevel: Calendar.CalendarAccessLevel.OWNER,
-                    ownerAccount: "myApp",
+                const endOfMonth = new Date(selectedDate);
+                endOfMonth.setMonth(endOfMonth.getMonth() + 1);
+                endOfMonth.setDate(0);
+                endOfMonth.setHours(23, 59, 59, 999);
+
+                const monthShifts = shifts.filter((shift) => {
+                    const shiftDate = new Date(shift.date);
+                    return shiftDate >= startOfMonth && shiftDate <= endOfMonth;
                 });
-                console.log("Created new calendar with ID:", calendarId);
-            } else {
-                calendarId = calendars[0].id;
-            }
+                setMonthEvents(monthShifts);
 
-            // Tạo sự kiện mẫu cho các ngày khác nhau trong tháng 3/2025
-            const sampleEvents = [
-                // Ngày 18/03/2025
-                {
-                    title: "Họp nhóm",
-                    startDate: new Date("2025-03-18T09:00:00"),
-                    endDate: new Date("2025-03-18T10:30:00"),
-                    notes: "Phòng họp A",
-                },
-                // Ngày 20/03/2025
-                {
-                    title: "Tập gym",
-                    startDate: new Date("2025-03-20T14:30:00"),
-                    endDate: new Date("2025-03-20T16:00:00"),
-                    notes: "Phòng tập XYZ",
-                },
-                // Ngày 21/03/2025
-                {
-                    title: "Học Toán",
-                    startDate: new Date("2025-03-21T07:30:00"),
-                    endDate: new Date("2025-03-21T09:00:00"),
-                    notes: "Gặp thầy Nam",
-                },
-                {
-                    title: "Học Văn",
-                    startDate: new Date("2025-03-21T10:30:00"),
-                    endDate: new Date("2025-03-21T12:00:00"),
-                    notes: "Phòng 301",
-                },
-                // Ngày 25/03/2025
-                {
-                    title: "Thuyết trình",
-                    startDate: new Date("2025-03-25T13:00:00"),
-                    endDate: new Date("2025-03-25T14:30:00"),
-                    notes: "Hội trường lớn",
-                },
-                {
-                    title: "Học nhóm",
-                    startDate: new Date("2025-03-25T16:00:00"),
-                    endDate: new Date("2025-03-25T17:30:00"),
-                    notes: "Thư viện",
-                },
-            ];
+                // Lấy sự kiện cho ngày được chọn
+                const startOfDay = new Date(selectedDate);
+                startOfDay.setHours(0, 0, 0, 0);
+                const endOfDay = new Date(selectedDate);
+                endOfDay.setHours(23, 59, 59, 999);
 
-            // Xóa tất cả sự kiện cũ trong tháng 3/2025
-            const startOfMonth = new Date("2025-03-01");
-            startOfMonth.setHours(0, 0, 0, 0);
-            const endOfMonth = new Date("2025-03-31");
-            endOfMonth.setHours(23, 59, 59, 999);
-
-            const existingEvents = await Calendar.getEventsAsync(
-                [calendarId],
-                startOfMonth,
-                endOfMonth
-            );
-            console.log("Existing events before deletion:", existingEvents);
-
-            for (const event of existingEvents) {
-                await Calendar.deleteEventAsync(event.id);
-            }
-
-            // Thêm các sự kiện mẫu
-            for (const event of sampleEvents) {
-                const eventId = await Calendar.createEventAsync(calendarId, {
-                    title: event.title,
-                    startDate: event.startDate,
-                    endDate: event.endDate,
-                    notes: event.notes,
+                const dayShifts = shifts.filter((shift) => {
+                    const shiftDate = new Date(shift.date);
+                    return shiftDate >= startOfDay && shiftDate <= endOfDay;
                 });
-                console.log(`Created event: ${event.title} with ID: ${eventId}`);
+                setEvents(dayShifts);
+
+                console.log("Month shifts:", monthShifts);
+                console.log("Day shifts:", dayShifts);
+            } catch (error) {
+                console.error("Error fetching data:", error);
             }
+        };
 
-            // Lấy sự kiện cho ngày được chọn
-            const startOfDay = new Date(selectedDate);
-            startOfDay.setHours(0, 0, 0, 0);
-            const endOfDay = new Date(selectedDate);
-            endOfDay.setHours(23, 59, 59, 999);
-
-            const updatedEvents = await Calendar.getEventsAsync(
-                [calendarId],
-                startOfDay,
-                endOfDay
-            );
-            console.log("Events for", selectedDate.toDateString(), ":", updatedEvents);
-            setEvents(updatedEvents);
-
-            // Lấy sự kiện cho cả tháng
-            const monthEventsData = await Calendar.getEventsAsync(
-                [calendarId],
-                startOfMonth,
-                endOfMonth
-            );
-            console.log("Month events:", monthEventsData);
-            setMonthEvents(monthEventsData);
-        })();
+        fetchData();
     }, [selectedDate]);
 
     const getBusySlotsForDay = (date, eventList) => {
@@ -168,13 +84,21 @@ export function Schedule() {
             const [endHour, endMinute] = slot.end.split(":");
             slotEnd.setHours(parseInt(endHour), parseInt(endMinute), 0, 0);
 
-            const event = eventList.find((e) => {
-                const eventStart = new Date(e.startDate);
-                const eventEnd = new Date(e.endDate);
+            const event = eventList.find((shift) => {
+                const shiftDate = new Date(shift.date);
+                const shiftStartTime = shift.slotsId.startTime.split(":");
+                const shiftEndTime = shift.slotsId.endTime.split(":");
+                
+                const shiftStart = new Date(shiftDate);
+                shiftStart.setHours(parseInt(shiftStartTime[0]), parseInt(shiftStartTime[1]), 0, 0);
+                
+                const shiftEnd = new Date(shiftDate);
+                shiftEnd.setHours(parseInt(shiftEndTime[0]), parseInt(shiftEndTime[1]), 0, 0);
+
                 return (
-                    eventStart.toDateString() === date.toDateString() &&
-                    eventStart < slotEnd &&
-                    eventEnd > slotStart
+                    shiftDate.toDateString() === date.toDateString() &&
+                    shiftStart < slotEnd &&
+                    shiftEnd > slotStart
                 );
             });
 
@@ -199,7 +123,6 @@ export function Schedule() {
 
     const renderDayView = () => {
         const slots = getBusySlots(selectedDate);
-        console.log("Rendering slots:", slots);
 
         return (
             <View style={styles.dayContainer}>
@@ -243,7 +166,7 @@ export function Schedule() {
                             </View>
                             <Text style={styles.slotStatus}>
                                 {item.isBusy
-                                    ? item.event?.title || "Bận"
+                                    ? item.event?.slotsId?.startTime + " - " + item.event?.slotsId?.endTime // Hiển thị thời gian shift
                                     : "Trống"}
                             </Text>
                         </TouchableOpacity>
@@ -258,8 +181,8 @@ export function Schedule() {
         const markedDates = {};
         const busyCountPerDay = {};
 
-        monthEvents.forEach((event) => {
-            const dateStr = new Date(event.startDate).toISOString().split("T")[0];
+        monthEvents.forEach((shift) => {
+            const dateStr = new Date(shift.date).toISOString().split("T")[0];
             const daySlots = getBusySlotsForDay(new Date(dateStr), monthEvents);
             const busyCount = daySlots.filter((slot) => slot.isBusy).length;
 
