@@ -8,13 +8,18 @@ import {
 } from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
 import TreatmentSection from "../../../components/treatmentComponents/TreatmentSection";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import axios from "axios";
+import  AsyncStorage  from '@react-native-async-storage/async-storage';
+import api from "../../../hooks/axiosInstance";
+import FirstLoginBanner from "../../../components/landingPage/FirstLoginBanner";
 
 export function TreatmentPage() {
   const [treatments, setTreatments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+   const [showFirstLoginBanner, setShowFirstLoginBanner] = useState(false);
+   const [currentAccount, setCurrentAccount] = useState(null);
 
   useEffect(() => {
     fetchTreatments();
@@ -35,6 +40,64 @@ export function TreatmentPage() {
       setLoading(false);
     }
   };
+
+
+  // Fetch user profile
+  const fetchUserProfile = useCallback(async () => {
+    try {
+      setLoading(true);
+      const token = await AsyncStorage.getItem("accessToken");
+      if (!token) {
+        throw new Error("No access token found");
+      }
+
+      const response = await api.get("/account/profileJWT", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Cache-Control": "no-cache",
+        },
+      });
+      const accountData = response.data.user;
+      setCurrentAccount(accountData);
+      setShowFirstLoginBanner(accountData?.firstTimeLogin);
+    } catch (err) {
+      setError("Failed to fetch profile: " + err.message);
+      console.error("Error fetching profile:", err);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  const updateFirstLoginStatus = async () => {
+    try {
+      const token = await AsyncStorage.getItem("accessToken");
+      const response = await api.patch(
+        `/account/updateProfileJWT/${currentAccount._id}`, {
+
+        firstTimeLogin: false,
+        // id: currentAccount._id,
+      },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+
+      );
+
+
+      const updatedAccount = response.data.user; // Access nested user object
+      setCurrentAccount(updatedAccount);
+      setShowFirstLoginBanner(updatedAccount.firstTimeLogin); // Update banner state
+    } catch (err) {
+      setError("Failed to update profile: " + err.message);
+      console.error("Error updating profile:", err);
+    }
+  };
+  useEffect(() => {
+    fetchUserProfile();
+  }, [fetchUserProfile]);
+
 
   if (loading) {
     return (
@@ -58,6 +121,15 @@ export function TreatmentPage() {
 
   return (
     <SafeAreaView style={styles.container}>
+      {showFirstLoginBanner == true && (
+        <FirstLoginBanner
+          onSkip={() => {
+            console.log("Skip triggered from LandingPage");
+            updateFirstLoginStatus();
+          }}
+          onTakeQuiz={updateFirstLoginStatus}
+        />
+      )}
       <ScrollView>
         <TreatmentSection treatments={treatments} />
       </ScrollView>

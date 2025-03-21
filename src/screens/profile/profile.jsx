@@ -66,19 +66,9 @@ export function Profile() {
 
   const menuItems = [
     {
-      title: "Skin Profile",
-      icon: "body-outline",
-      screen: "SkinProfile",
-    },
-    {
-      title: "Medical Records",
+      title: "Quiz Records",
       icon: "document-text-outline",
-      screen: "MedicalRecords",
-    },
-    {
-      title: "Settings",
-      icon: "settings-outline",
-      screen: "Settings",
+      screen: "QuizRecord",
     },
     {
       title: "Logout",
