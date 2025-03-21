@@ -8,6 +8,9 @@ import {
   ScrollView,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
+import { Ionicons } from "@expo/vector-icons";
+import { TreatmentPage } from "../treatment/treatmentPage";
+import { TreatmentNavigation } from "../../../routes/homeRoute/treatmentNavigation";
 
 export function RoadmapScreen({ route }) {
   const { services } = route.params;

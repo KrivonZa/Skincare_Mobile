@@ -20,11 +20,6 @@ export function QuizNavigation() {
         component={QuizStatus}
         options={{ title: "Quiz Status", headerShown: false }}
       />
-      {/* <QuizStack.Screen
-        name="QuizDetail"
-        component={QuizDetail}
-        options={{ title: "Quiz Detail", headerShown: true }}
-      /> */}
     </QuizStack.Navigator>
   );
 }

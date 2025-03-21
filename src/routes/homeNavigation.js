@@ -131,7 +131,7 @@ export function HomeNavigation() {
       <Home.Screen
         name="RoadmapScreen"
         component={RoadmapScreen}
-        options={{ title: "Booking Service", headerShown: true }}
+        options={{ title: "Roadmap Service", headerShown: true }}
       />
       <Home.Screen
         name="BookingHistoryDetail"

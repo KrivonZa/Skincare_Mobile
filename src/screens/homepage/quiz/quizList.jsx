@@ -11,6 +11,7 @@ import { useState, useEffect } from "react";
 import { useNavigation } from "@react-navigation/native";
 import api from "../../../hooks/axiosInstance";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { Ionicons } from "@expo/vector-icons";
 
 export function QuizStatus() {
   const navigation = useNavigation();
@@ -58,7 +59,7 @@ export function QuizStatus() {
           const scoreBandResponse = await api.get("/scoreband", {
             headers: { Authorization: `Bearer ${token}` },
           });
-          console.log("ScoreBands:", scoreBandResponse.data);
+          console.log("ScoreBands (raw):", scoreBandResponse.data);
           setScoreBands(scoreBandResponse.data);
         } catch (err) {
           console.error(
@@ -74,7 +75,7 @@ export function QuizStatus() {
           const roadmapResponse = await api.get("/roadmap", {
             headers: { Authorization: `Bearer ${token}` },
           });
-          console.log("Roadmaps:", roadmapResponse.data);
+          console.log("Roadmaps (raw):", roadmapResponse.data);
           setRoadmaps(roadmapResponse.data);
         } catch (err) {
           console.error(
@@ -90,8 +91,18 @@ export function QuizStatus() {
           const serviceResponse = await api.get("/service", {
             headers: { Authorization: `Bearer ${token}` },
           });
-          console.log("Services:", serviceResponse.data);
-          setServices(serviceResponse.data);
+          console.log("Services (raw):", serviceResponse.data);
+          // Lọc trùng lặp dựa trên _id.$oid
+          const uniqueServices = Array.from(
+            new Map(
+              serviceResponse.data.map((service) => [
+                service._id.$oid || service._id,
+                service,
+              ])
+            ).values()
+          );
+          console.log("Unique Services:", uniqueServices);
+          setServices(uniqueServices);
         } catch (err) {
           console.error(
             "Error fetching /service:",
@@ -142,25 +153,48 @@ export function QuizStatus() {
       0
     );
 
+    console.log("Total Score:", totalScore);
+
     const matchedBand = scoreBands.find(
       (band) => totalScore >= band.minPoint && totalScore <= band.maxPoint
     );
 
     if (matchedBand) {
-      const matchedRoadmap = roadmaps.find(
-        (roadmap) => roadmap._id.$oid === matchedBand.roadmapId.$oid
-      );
+      console.log("Matched ScoreBand:", matchedBand);
+      console.log("ScoreBand roadmapId:", matchedBand.roadmapId);
+
+      // Tìm roadmap tương ứng với roadmapId
+      const matchedRoadmap = roadmaps.find((roadmap) => {
+        const roadmapId = roadmap._id.$oid || roadmap._id; // Xử lý cả trường hợp _id là chuỗi
+        const scoreBandRoadmapId =
+          matchedBand.roadmapId.$oid || matchedBand.roadmapId._id;
+        console.log(
+          `Comparing roadmap._id: ${roadmapId} with scoreBand.roadmapId: ${scoreBandRoadmapId}`
+        );
+        return roadmapId === scoreBandRoadmapId;
+      });
 
       if (matchedRoadmap) {
+        console.log("Matched Roadmap:", matchedRoadmap);
+
         // Lấy danh sách service từ serviceId trong roadmap
         const roadmapServices = matchedRoadmap.serviceId
-          .map((serviceId) =>
-            services.find((service) => service._id.$oid === serviceId.$oid)
-          )
+          .map((serviceId, index) => {
+            // serviceId có thể là chuỗi hoặc object có $oid
+            const serviceIdValue =
+              typeof serviceId === "string" ? serviceId : serviceId.$oid;
+            const matchedService = services.find(
+              (service) => (service._id.$oid || service._id) === serviceIdValue
+            );
+            console.log(
+              `Service for serviceId[${index}] (${serviceIdValue}):`,
+              matchedService
+            );
+            return matchedService;
+          })
           .filter((service) => service);
 
         // Log để kiểm tra roadmapServices
-        console.log("Matched Roadmap:", matchedRoadmap);
         console.log("Service IDs in Roadmap:", matchedRoadmap.serviceId);
         console.log("Roadmap Services:", roadmapServices);
         console.log(
@@ -177,9 +211,14 @@ export function QuizStatus() {
         setQuizResult(result);
         setModalVisible(true);
       } else {
+        console.log(
+          "No matching roadmap found for roadmapId:",
+          matchedBand.roadmapId
+        );
         alert("No matching roadmap found for your score band.");
       }
     } else {
+      console.log("No matching score band found for score:", totalScore);
       alert("No matching score band found for your score.");
     }
   };
@@ -272,6 +311,7 @@ export function QuizStatus() {
               disabled={quizResult?.roadmapServices.length === 0}
             >
               <Text style={styles.roadmapButtonText}>Your Road Map</Text>
+              <Ionicons name="arrow-forward" size={24} color="#FFF" />
             </TouchableOpacity>
           </View>
         </View>
@@ -377,6 +417,9 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 6,
+    flexDirection: "row",
+    justifyContent: "center",
+    gap: 10,
   },
   disabledButton: {
     backgroundColor: "#CCCCCC",
