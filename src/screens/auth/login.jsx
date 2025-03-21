@@ -41,7 +41,7 @@ export function Login() {
         email,
         password,
       });
-      const token = response.data.token;
+      const token = response?.data?.token;
       await AsyncStorage.setItem('accessToken', token);
       navigation.navigate("Home");
 
