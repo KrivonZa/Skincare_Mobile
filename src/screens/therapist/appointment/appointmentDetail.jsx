@@ -19,6 +19,7 @@ import api from "../../../hooks/axiosInstance";
 export function AppointmentDetail() {
     const route = useRoute();
     const { appointment } = route.params;
+    console.log(appointment)
 
     const [checkInImage, setCheckInImage] = useState(appointment.checkInImage);
     const [checkOutImage, setCheckOutImage] = useState(appointment.checkOutImage);

@@ -156,7 +156,7 @@ export function Schedule() {
                             onPress={() => {
                                 if (item.isBusy && item.event) {
                                     navigation.navigate("AppointmentDetail", {
-                                        event: item.event,
+                                        appointment: item.event?.appointmentId,
                                     });
                                 }
                             }}
