@@ -9,8 +9,6 @@ import {
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
-import { TreatmentPage } from "../treatment/treatmentPage";
-import { TreatmentNavigation } from "../../../routes/homeRoute/treatmentNavigation";
 
 export function RoadmapScreen({ route }) {
   const { services } = route.params;
@@ -34,7 +32,7 @@ export function RoadmapScreen({ route }) {
               <View style={styles.stepCircle}>
                 <Text style={styles.stepNumber}>{index + 1}</Text>
               </View>
-              {index < services.length && <View style={styles.stepLine} />}
+              {index < services.length - 1 && <View style={styles.stepLine} />}
             </View>
 
             {/* Service Card */}
@@ -57,6 +55,14 @@ export function RoadmapScreen({ route }) {
             </TouchableOpacity>
           </View>
         ))}
+        {/* Back to Treatment Button */}
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => navigation.navigate("DrawerNavigation")}
+        >
+          <Ionicons name="arrow-back-outline" size={20} color="#FFF" />
+          <Text style={styles.buttonText}>Back to Treatment</Text>
+        </TouchableOpacity>
       </ScrollView>
     </SafeAreaView>
   );
@@ -135,5 +141,23 @@ const styles = StyleSheet.create({
   servicePrice: {
     fontSize: 14,
     color: "#666",
+  },
+  backButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#F07D87",
+    paddingVertical: 12,
+    paddingHorizontal: 25,
+    borderRadius: 8,
+    alignSelf: "center",
+    marginTop: 20,
+    borderWidth: 1,
+    borderColor: "#E06D77",
+  },
+  buttonText: {
+    color: "#FFF",
+    fontSize: 18,
+    fontWeight: "600",
+    marginLeft: 10,
   },
 });

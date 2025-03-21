@@ -20,9 +20,8 @@ export function Appointment() {
     const { user } = useAuth();
     const [sortOrder, setSortOrder] = useState("newest");
     const [statusFilter, setStatusFilter] = useState("Scheduled");
-    const [refreshing, setRefreshing] = useState(false); // Thêm state để quản lý trạng thái refresh
+    const [refreshing, setRefreshing] = useState(false);
 
-    // Hàm fetch dữ liệu
     const fetchData = async () => {
         try {
             const response = await api.get(`/appointment/account/${user._id}`);
@@ -34,16 +33,14 @@ export function Appointment() {
         }
     };
 
-    // useEffect để load dữ liệu lần đầu
     useEffect(() => {
         fetchData();
     }, []);
 
-    // Hàm xử lý khi kéo để refresh
     const onRefresh = async () => {
-        setRefreshing(true); // Bật trạng thái refreshing
-        await fetchData(); // Gọi lại API để lấy dữ liệu mới
-        setRefreshing(false); // Tắt trạng thái refreshing sau khi hoàn thành
+        setRefreshing(true);
+        await fetchData();
+        setRefreshing(false);
     };
 
     const sortAppointments = (order) => {
@@ -67,7 +64,6 @@ export function Appointment() {
 
     const renderAppointment = ({ item }) => (
         <TouchableOpacity
-            key={item._id}
             style={styles.appointmentCard}
             onPress={() => navigation.navigate("AppointmentDetail", { appointment: item })}
         >
@@ -90,6 +86,7 @@ export function Appointment() {
 
     const renderFilterItem = (item) => (
         <TouchableOpacity
+            key={item} // Added key here
             style={[
                 styles.filterButton,
                 statusFilter === item && styles.activeFilterButton,
@@ -109,7 +106,6 @@ export function Appointment() {
 
     return (
         <SafeAreaView style={styles.container}>
-            {/* Header Section */}
             <View style={styles.headerContainer}>
                 <View style={styles.sortContainer}>
                     <TouchableOpacity
@@ -138,23 +134,21 @@ export function Appointment() {
                 </ScrollView>
             </View>
 
-            {/* Content Section */}
             <FlatList
                 data={filteredAppointments}
                 renderItem={renderAppointment}
-                keyExtractor={(item) => item._id}
+                keyExtractor={(item, index) => index.toString()}
                 ListEmptyComponent={
                     <Text style={styles.emptyText}>No appointments found</Text>
                 }
                 contentContainerStyle={styles.listContent}
-                refreshing={refreshing} // Trạng thái đang refresh
-                onRefresh={onRefresh} // Hàm được gọi khi kéo xuống
+                refreshing={refreshing}
+                onRefresh={onRefresh}
             />
         </SafeAreaView>
     );
 }
 
-// Styles giữ nguyên như cũ
 const styles = StyleSheet.create({
     container: {
         flex: 1,

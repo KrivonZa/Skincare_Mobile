@@ -27,20 +27,18 @@ export function QuizStatus() {
   const [quizResult, setQuizResult] = useState(null);
   const { user } = useAuth();
 
-  // Lấy dữ liệu từ API
+  // Fetch data logic remains unchanged
   useEffect(() => {
     const fetchData = async () => {
       try {
         const token = await AsyncStorage.getItem("accessToken");
         console.log("Access Token:", token);
 
-        // Lấy danh sách câu hỏi
         console.log("Fetching /question...");
         try {
           const quizResponse = await api.get("/question", {
             headers: { Authorization: `Bearer ${token}` },
           });
-          console.log("Questions:", quizResponse.data);
           const formattedQuizzes = quizResponse.data.map((quiz) => ({
             id: quiz._id,
             title: quiz.title || "Untitled Quiz",
@@ -48,53 +46,34 @@ export function QuizStatus() {
           }));
           setQuizzes(formattedQuizzes);
         } catch (err) {
-          console.error(
-            "Error fetching /question:",
-            err.response?.status,
-            err.response?.data
-          );
+          console.error("Error fetching /question:", err.response?.data);
         }
 
-        // Lấy danh sách scoreband
         console.log("Fetching /scoreband...");
         try {
           const scoreBandResponse = await api.get("/scoreband", {
             headers: { Authorization: `Bearer ${token}` },
           });
-          console.log("ScoreBands (raw):", scoreBandResponse.data);
           setScoreBands(scoreBandResponse.data);
         } catch (err) {
-          console.error(
-            "Error fetching /scoreband:",
-            err.response?.status,
-            err.response?.data
-          );
+          console.error("Error fetching /scoreband:", err.response?.data);
         }
 
-        // Lấy danh sách roadmap
         console.log("Fetching /roadmap...");
         try {
           const roadmapResponse = await api.get("/roadmap", {
             headers: { Authorization: `Bearer ${token}` },
           });
-          console.log("Roadmaps (raw):", roadmapResponse.data);
           setRoadmaps(roadmapResponse.data);
         } catch (err) {
-          console.error(
-            "Error fetching /roadmap:",
-            err.response?.status,
-            err.response?.data
-          );
+          console.error("Error fetching /roadmap:", err.response?.data);
         }
 
-        // Lấy danh sách service
         console.log("Fetching /service...");
         try {
           const serviceResponse = await api.get("/service", {
             headers: { Authorization: `Bearer ${token}` },
           });
-          console.log("Services (raw):", serviceResponse.data);
-          // Lọc trùng lặp dựa trên _id.$oid
           const uniqueServices = Array.from(
             new Map(
               serviceResponse.data.map((service) => [
@@ -103,24 +82,14 @@ export function QuizStatus() {
               ])
             ).values()
           );
-          console.log("Unique Services:", uniqueServices);
           setServices(uniqueServices);
         } catch (err) {
-          console.error(
-            "Error fetching /service:",
-            err.response?.status,
-            err.response?.data
-          );
+          console.error("Error fetching /service:", err.response?.data);
           setServices([]);
         }
 
         setSelectedAnswers({});
       } catch (err) {
-        console.error(
-          "General error:",
-          err.response?.status,
-          err.response?.data
-        );
         setError(err.message);
       } finally {
         setLoading(false);
@@ -130,7 +99,6 @@ export function QuizStatus() {
     fetchData();
   }, []);
 
-  // Xử lý khi chọn câu trả lời
   const handleAnswerSelect = (quizId, answer) => {
     const updatedAnswers = {
       ...selectedAnswers,
@@ -139,12 +107,9 @@ export function QuizStatus() {
     setSelectedAnswers(updatedAnswers);
   };
 
-  // Gửi dữ liệu lên API /userQuiz
   const postUserQuiz = async (totalScore, matchedBand) => {
     try {
       const token = await AsyncStorage.getItem("accessToken");
-
-      // Tạo mảng result từ quizzes và selectedAnswers
       const result = quizzes.map((quiz) => {
         const answer = selectedAnswers[quiz.id] || { title: "", point: 0 };
         return {
@@ -154,96 +119,58 @@ export function QuizStatus() {
         };
       });
 
-      // Tạo payload cho API /userQuiz
       const payload = {
         accountId: user._id,
-        scoreBandId: matchedBand._id.$oid || matchedBand._id, // Lấy _id của scoreband
+        scoreBandId: matchedBand._id.$oid || matchedBand._id,
         result: result,
         totalPoint: totalScore,
       };
 
-      console.log("Posting to /userQuiz with payload:", payload);
-
-      // Gửi yêu cầu POST đến API /userQuiz
       const response = await api.post("/userQuiz", payload, {
         headers: { Authorization: `Bearer ${token}` },
       });
-
-      console.log("Successfully posted to /userQuiz:", response.data);
       return response.data;
     } catch (err) {
-      console.error(
-        "Error posting to /userQuiz:",
-        err.response?.status,
-        err.response?.data || err.message
-      );
+      console.error("Error posting to /userQuiz:", err.response?.data);
       throw err;
     }
   };
 
-  // Kiểm tra totalScore với scoreband và tìm roadmap
   const checkScoreBand = async (answers) => {
     const totalScore = Object.values(answers).reduce(
       (sum, answer) => sum + answer.point,
       0
     );
 
-    console.log("Total Score:", totalScore);
-
     const matchedBand = scoreBands.find(
       (band) => totalScore >= band.minPoint && totalScore <= band.maxPoint
     );
 
     if (matchedBand) {
-      console.log("Matched ScoreBand:", matchedBand);
-      console.log("ScoreBand roadmapId:", matchedBand.roadmapId);
-
-      // Gửi dữ liệu lên API /userQuiz trước khi tiếp tục
       try {
         await postUserQuiz(totalScore, matchedBand);
       } catch (err) {
         alert("Failed to save quiz result. Please try again.");
-        return; // Dừng lại nếu không gửi được dữ liệu lên API
+        return;
       }
 
-      // Tìm roadmap tương ứng với roadmapId
       const matchedRoadmap = roadmaps.find((roadmap) => {
-        const roadmapId = roadmap._id.$oid || roadmap._id; // Xử lý cả trường hợp _id là chuỗi
+        const roadmapId = roadmap._id.$oid || roadmap._id;
         const scoreBandRoadmapId =
           matchedBand.roadmapId.$oid || matchedBand.roadmapId._id;
-        console.log(
-          `Comparing roadmap._id: ${roadmapId} with scoreBand.roadmapId: ${scoreBandRoadmapId}`
-        );
         return roadmapId === scoreBandRoadmapId;
       });
 
       if (matchedRoadmap) {
-        console.log("Matched Roadmap:", matchedRoadmap);
-
-        // Lấy danh sách service từ serviceId trong roadmap
         const roadmapServices = matchedRoadmap.serviceId
-          .map((serviceId, index) => {
-            // serviceId có thể là chuỗi hoặc object có $oid
+          .map((serviceId) => {
             const serviceIdValue =
               typeof serviceId === "string" ? serviceId : serviceId.$oid;
-            const matchedService = services.find(
+            return services.find(
               (service) => (service._id.$oid || service._id) === serviceIdValue
             );
-            console.log(
-              `Service for serviceId[${index}] (${serviceIdValue}):`,
-              matchedService
-            );
-            return matchedService;
           })
           .filter((service) => service);
-
-        // Log để kiểm tra roadmapServices
-        console.log("Service IDs in Roadmap:", matchedRoadmap.serviceId);
-        console.log("Roadmap Services:", roadmapServices);
-        console.log(
-          "Roadmap Service Names:",
-          roadmapServices.map((service) => service.serviceName)
-        );
 
         const result = {
           totalScore,
@@ -254,19 +181,13 @@ export function QuizStatus() {
         setQuizResult(result);
         setModalVisible(true);
       } else {
-        console.log(
-          "No matching roadmap found for roadmapId:",
-          matchedBand.roadmapId
-        );
         alert("No matching roadmap found for your score band.");
       }
     } else {
-      console.log("No matching score band found for score:", totalScore);
       alert("No matching score band found for your score.");
     }
   };
 
-  // Xử lý khi nhấn nút Submit
   const handleSubmit = async () => {
     if (Object.keys(selectedAnswers).length !== quizzes.length) {
       alert("Please answer all questions before submitting.");
@@ -284,7 +205,7 @@ export function QuizStatus() {
           style={[
             styles.answerOption,
             selectedAnswers[quiz.id]?.title === answer.title &&
-              styles.selectedAnswer,
+            styles.selectedAnswer,
           ]}
           onPress={() => handleAnswerSelect(quiz.id, answer)}
         >
@@ -348,17 +269,22 @@ export function QuizStatus() {
               </>
             )}
             <TouchableOpacity
-              style={[styles.backToHome]}
-              onPress={() => navigation.navigate("DrawerNavigation")}
+              style={styles.backButton}
+              onPress={() => {
+                // Reset quiz data
+                setSelectedAnswers({});
+                setQuizResult(null);
+                setModalVisible(false); // Close the modal
+                navigation.navigate("Treatment"); // Navigate back to Treatment
+              }}
             >
-              <Text style={styles.roadmapButtonText}>Back to Home</Text>
-              {/* <Ionicons name="arrow-forward" size={24} color="#FFF" /> */}
+              <Ionicons name="home-outline" size={20} color="#FFF" />
+              <Text style={styles.buttonText}>Return to Home</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={[
                 styles.roadmapButton,
-                quizResult?.roadmapServices.length === 0 &&
-                  styles.disabledButton,
+                quizResult?.roadmapServices.length === 0 && styles.disabledButton,
               ]}
               onPress={() => {
                 if (quizResult?.roadmapServices.length === 0) return;
@@ -369,8 +295,8 @@ export function QuizStatus() {
               }}
               disabled={quizResult?.roadmapServices.length === 0}
             >
-              <Text style={styles.roadmapButtonText}>Your Road Map</Text>
-              <Ionicons name="arrow-forward" size={24} color="#FFF" />
+              <Ionicons name="map-outline" size={20} color="#FFF" />
+              <Text style={styles.buttonText}>View Your Roadmap</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -452,48 +378,64 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(0, 0, 0, 0.5)",
   },
   modalContent: {
-    width: "80%",
+    width: "85%", // Slightly wider for better spacing
     backgroundColor: "#FFF",
-    borderRadius: 10,
-    padding: 20,
+    borderRadius: 12,
+    padding: 25,
     alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 5,
+    elevation: 5,
   },
   modalTitle: {
-    fontSize: 22,
-    fontWeight: "bold",
+    fontSize: 24,
+    fontWeight: "700",
     color: "#333",
-    marginBottom: 15,
+    marginBottom: 20,
   },
   modalText: {
     fontSize: 16,
     color: "#666",
-    marginBottom: 10,
+    marginBottom: 12,
     textAlign: "center",
+    lineHeight: 22,
+  },
+  backButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#F07D87",
+    paddingVertical: 12,
+    paddingHorizontal: 25,
+    borderRadius: 8,
+    marginTop: 20,
+    width: "80%",
+    justifyContent: "center",
+    borderWidth: 1,
+    borderColor: "#E06D77",
   },
   roadmapButton: {
-    marginTop: 20,
-    backgroundColor: "#F07D87",
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 6,
     flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#F07D87",
+    paddingVertical: 12,
+    paddingHorizontal: 25,
+    borderRadius: 8,
+    marginTop: 15,
+    width: "80%",
     justifyContent: "center",
-    gap: 10,
+    borderWidth: 1,
+    borderColor: "#E06D77",
   },
   disabledButton: {
-    backgroundColor: "#CCCCCC",
+    backgroundColor: "#D3D3D3",
+    borderColor: "#B0B0B0",
   },
-  roadmapButtonText: {
+  buttonText: {
     color: "#FFF",
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: "600",
-  },
-  backToHome: {
-    backgroundColor: "#F07D87",
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 6,
-    flexDirection: "row",
-    justifyContent: "center",
+    marginLeft: 10,
   },
 });
