@@ -2,7 +2,12 @@ import React from "react";
 import { Image, View, StyleSheet, TouchableOpacity } from "react-native";
 import { createDrawerNavigator } from "@react-navigation/drawer";
 import { createStackNavigator } from "@react-navigation/stack";
-import { BookingDetail, BookingTreatment } from "../screens/homepage";
+import {
+  BookingDetail,
+  BookingTreatment,
+  PaymentPage,
+  BookingStatus,
+} from "../screens/homepage";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { TreatmentNavigation, BookingNavigation } from "./homeRoute";
@@ -137,6 +142,11 @@ export function HomeNavigation() {
         name="BookingHistoryDetail"
         component={BookingHistoryDetail}
         options={{ title: "Booking Detail", headerShown: true }}
+      />
+      <Home.Screen
+        name="Payment"
+        component={PaymentPage}
+        options={{ title: "Payment", headerShown: true }}
       />
     </Home.Navigator>
   );

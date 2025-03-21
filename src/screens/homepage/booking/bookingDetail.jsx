@@ -4,15 +4,163 @@ import {
   Text,
   TouchableOpacity,
   SafeAreaView,
+  FlatList,
+  ScrollView,
 } from "react-native";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation, useRoute } from "@react-navigation/native";
+import api from "../../../hooks/axiosInstance";
+import { Calendar } from "react-native-calendars";
 
 export function BookingDetail() {
   const navigation = useNavigation();
+  const [therapists, setTherapists] = useState([]);
+  const [slots, setSlots] = useState([]);
+  const [shifts, setShifts] = useState([]);
+  const [selectedTherapist, setSelectedTherapist] = useState(null);
+  const [selectedDate, setSelectedDate] = useState("");
+  const [selectedSlot, setSelectedSlot] = useState(null);
   const route = useRoute();
   const { appointment } = route.params;
+
+  const fetchData = async () => {
+    try {
+      const response1 = await api.get(`/therapist/by-service/${appointment.detail._id}`);
+      setTherapists(response1.data);
+      const response2 = await api.get(`/slots`);
+      setSlots(response2.data);
+    } catch (error) {
+      console.error("Error fetching appointments:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const fetchShifts = async (therapistId) => {
+    try {
+      const response = await api.get(`/shifts/therapist/upcoming/${therapistId}`);
+      setShifts(response.data);
+    } catch (error) {
+      console.error("Error fetching shifts:", error);
+    }
+  };
+
+  const isSlotAvailable = (slot, date) => {
+    const selectedDateTime = new Date(`${date}T${slot.startTime}:00`);
+    return !shifts.some((shift) => {
+      const shiftDate = new Date(shift.date);
+      return (
+        shift.slotsId._id === slot._id &&
+        shiftDate.toDateString() === selectedDateTime.toDateString()
+      );
+    });
+  };
+
+  const renderTherapistDetails = () => {
+    // Tính ngày mai
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const minDate = tomorrow.toISOString().split("T")[0];
+
+    return (
+      <View style={styles.card}>
+        <Text style={styles.cardTitle}>Available Therapists</Text>
+        <FlatList
+          data={therapists}
+          keyExtractor={(item) => item._id}
+          renderItem={({ item }) => (
+            <TouchableOpacity
+              style={styles.therapistItem}
+              onPress={() => {
+                setSelectedTherapist(item);
+                setSelectedDate("");
+                setSelectedSlot(null);
+                fetchShifts(item._id);
+              }}
+            >
+              <Text style={styles.therapistName}>{item.accountId.username}</Text>
+              <Text style={styles.therapistExperience}>{item.experience}</Text>
+            </TouchableOpacity>
+          )}
+          scrollEnabled={false} // Tắt scroll của FlatList để ScrollView bên ngoài quản lý
+        />
+
+        {selectedTherapist && (
+          <>
+            <Text style={styles.subTitle}>Select Date</Text>
+            <Calendar
+              onDayPress={(day) => {
+                setSelectedDate(day.dateString);
+                setSelectedSlot(null);
+              }}
+              markedDates={{
+                [selectedDate]: { selected: true, selectedColor: "#F07D87" },
+              }}
+              minDate={minDate} // Chỉ cho phép chọn từ ngày mai
+            />
+
+            {selectedDate && (
+              <>
+                <Text style={styles.subTitle}>Available Slots</Text>
+                <FlatList
+                  data={slots}
+                  keyExtractor={(item) => item._id}
+                  renderItem={({ item }) => {
+                    const available = isSlotAvailable(item, selectedDate);
+                    return (
+                      <TouchableOpacity
+                        style={[
+                          styles.slotItem,
+                          !available && styles.slotDisabled,
+                          selectedSlot?._id === item._id && styles.slotSelected,
+                        ]}
+                        onPress={() => available && setSelectedSlot(item)}
+                        disabled={!available}
+                      >
+                        <Text
+                          style={[
+                            styles.slotText,
+                            !available && styles.slotTextDisabled,
+                          ]}
+                        >
+                          {item.startTime} - {item.endTime}
+                        </Text>
+                        {!available && (
+                          <Text style={styles.slotStatus}>Booked</Text>
+                        )}
+                      </TouchableOpacity>
+                    );
+                  }}
+                  scrollEnabled={false} // Tắt scroll của FlatList
+                />
+              </>
+            )}
+
+            {selectedSlot && (
+              <TouchableOpacity
+                style={styles.bookButton}
+                onPress={() => {
+                  const bookingData = {
+                    therapistId: selectedTherapist._id,
+                    slotsId: selectedSlot._id,
+                    serviceId: appointment.detail._id,
+                    date: `${selectedDate}T${selectedSlot.startTime}:00.000Z`,
+                    treatment: appointment.detail,
+                  };
+                  navigation.navigate("Payment", { bookingData });
+                }}
+              >
+                <Text style={styles.bookButtonText}>Book Now</Text>
+              </TouchableOpacity>
+            )}
+          </>
+        )}
+      </View>
+    );
+  };
 
   const renderBasicInfo = () => (
     <View style={styles.card}>
@@ -23,7 +171,9 @@ export function BookingDetail() {
       </View>
       <View style={styles.infoRow}>
         <Ionicons name="time-outline" size={20} color="#F07D87" />
-        <Text style={styles.infoText}>Time: {appointment.time} ({appointment.duration})</Text>
+        <Text style={styles.infoText}>
+          Time: {appointment.time} ({appointment.duration})
+        </Text>
       </View>
       <View style={styles.infoRow}>
         <Ionicons name="pricetag-outline" size={20} color="#F07D87" />
@@ -56,7 +206,9 @@ export function BookingDetail() {
           <View style={styles.imageWrapper}>
             <Text style={styles.imageLabel}>Check-in</Text>
             {appointment.checkinImage ? (
-              <Text style={styles.imagePlaceholder}>Image: {appointment.checkinImage}</Text>
+              <Text style={styles.imagePlaceholder}>
+                Image: {appointment.checkinImage}
+              </Text>
             ) : (
               <Text style={styles.imagePlaceholder}>No Check-in Image</Text>
             )}
@@ -64,7 +216,9 @@ export function BookingDetail() {
           <View style={styles.imageWrapper}>
             <Text style={styles.imageLabel}>Check-out</Text>
             {appointment.checkoutImage ? (
-              <Text style={styles.imagePlaceholder}>Image: {appointment.checkoutImage}</Text>
+              <Text style={styles.imagePlaceholder}>
+                Image: {appointment.checkoutImage}
+              </Text>
             ) : (
               <Text style={styles.imagePlaceholder}>No Check-out Image</Text>
             )}
@@ -112,63 +266,32 @@ export function BookingDetail() {
       case "Cancelled":
         return renderCancelled();
       default:
-        return <Text style={styles.note}>No additional details available.</Text>;
+        return renderTherapistDetails();
     }
   };
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.content}>
-        {renderBasicInfo()}
-        {renderContent()}
-      </View>
+      <ScrollView contentContainerStyle={styles.scrollContent}>
+        <View style={styles.content}>
+          {renderBasicInfo()}
+          {renderContent()}
+        </View>
+      </ScrollView>
     </SafeAreaView>
   );
 }
-
-const getStatusColor = (status) => {
-  switch (status) {
-    case "Scheduled": return "#F07D87";
-    case "In Progress": return "#FFB6C1";
-    case "Completed": return "#98FB98";
-    case "Cancelled": return "#D3D3D3";
-    default: return "#F07D87";
-  }
-};
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#FFF",
   },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingVertical: 15,
-    paddingHorizontal: 10,
-    backgroundColor: "#F5F5F5",
-    borderBottomWidth: 1,
-    borderBottomColor: "#EEE",
-  },
-  backButton: {
-    padding: 5,
-  },
-  headerTitle: {
-    flex: 1,
-    fontSize: 20,
-    fontWeight: "bold",
-    color: "#F07D87",
-    marginLeft: 10,
-  },
-  headerStatus: {
-    fontSize: 12,
-    color: "#FFF",
-    paddingVertical: 4,
-    paddingHorizontal: 10,
-    borderRadius: 12,
+  scrollContent: {
+    flexGrow: 1, // Đảm bảo nội dung trong ScrollView có thể mở rộng
+    paddingBottom: 20, // Thêm padding để tránh nội dung bị cắt ở dưới
   },
   content: {
-    flex: 1,
     padding: 15,
   },
   card: {
@@ -184,6 +307,63 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     color: "#F07D87",
     marginBottom: 10,
+  },
+  subTitle: {
+    fontSize: 16,
+    fontWeight: "500",
+    color: "#333",
+    marginVertical: 10,
+  },
+  therapistItem: {
+    padding: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: "#EEE",
+  },
+  therapistName: {
+    fontSize: 16,
+    fontWeight: "500",
+    color: "#333",
+  },
+  therapistExperience: {
+    fontSize: 14,
+    color: "#666",
+  },
+  slotItem: {
+    padding: 10,
+    borderWidth: 1,
+    borderColor: "#F07D87",
+    borderRadius: 5,
+    marginBottom: 10,
+  },
+  slotSelected: {
+    backgroundColor: "#F07D87",
+  },
+  slotDisabled: {
+    backgroundColor: "#D3D3D3",
+    borderColor: "#D3D3D3",
+  },
+  slotText: {
+    fontSize: 14,
+    color: "#333",
+  },
+  slotTextDisabled: {
+    color: "#666",
+  },
+  slotStatus: {
+    fontSize: 12,
+    color: "#FFF",
+  },
+  bookButton: {
+    backgroundColor: "#F07D87",
+    padding: 15,
+    borderRadius: 8,
+    alignItems: "center",
+    marginTop: 15,
+  },
+  bookButtonText: {
+    color: "#FFF",
+    fontSize: 16,
+    fontWeight: "600",
   },
   infoRow: {
     flexDirection: "row",
@@ -254,3 +434,15 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
 });
+
+const getStatusColor = (status) => {
+  switch (status) {
+    case "Scheduled": return "#F07D87";
+    case "In Progress": return "#FFB6C1";
+    case "Completed": return "#98FB98";
+    case "Cancelled": return "#D3D3D3";
+    default: return "#F07D87";
+  }
+};
+
+export default BookingDetail;
