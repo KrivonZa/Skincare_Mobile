@@ -74,6 +74,16 @@ function DrawerNavigation() {
         }}
       />
       <Drawer.Screen
+        name="Quiz"
+        component={QuizNavigation}
+        options={{
+          title: "Quiz",
+          drawerIcon: ({ color, size }) => (
+            <Ionicons name="school-outline" size={size} color={color} />
+          ),
+        }}
+      />
+      <Drawer.Screen
         name="Logout"
         component={AuthNavigation} // Component giả, sẽ không dùng
         listeners={{
@@ -89,16 +99,6 @@ function DrawerNavigation() {
           title: "Logout",
           drawerIcon: ({ color, size }) => (
             <Ionicons name="log-out-outline" size={size} color={color} />
-          ),
-        }}
-      />
-      <Drawer.Screen
-        name="Quiz"
-        component={QuizNavigation}
-        options={{
-          title: "Quiz",
-          drawerIcon: ({ color, size }) => (
-            <Ionicons name="school-outline" size={size} color={color} />
           ),
         }}
       />
