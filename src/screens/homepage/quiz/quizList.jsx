@@ -12,6 +12,7 @@ import { useNavigation } from "@react-navigation/native";
 import api from "../../../hooks/axiosInstance";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Ionicons } from "@expo/vector-icons";
+import { useAuth } from "../../../context/AuthContext";
 
 export function QuizStatus() {
   const navigation = useNavigation();
@@ -24,6 +25,7 @@ export function QuizStatus() {
   const [selectedAnswers, setSelectedAnswers] = useState({});
   const [modalVisible, setModalVisible] = useState(false);
   const [quizResult, setQuizResult] = useState(null);
+  const { user } = useAuth();
 
   // Lấy dữ liệu từ API
   useEffect(() => {
@@ -137,17 +139,50 @@ export function QuizStatus() {
     setSelectedAnswers(updatedAnswers);
   };
 
-  // Xử lý khi nhấn nút Submit
-  const handleSubmit = () => {
-    if (Object.keys(selectedAnswers).length !== quizzes.length) {
-      alert("Please answer all questions before submitting.");
-      return;
+  // Gửi dữ liệu lên API /userQuiz
+  const postUserQuiz = async (totalScore, matchedBand) => {
+    try {
+      const token = await AsyncStorage.getItem("accessToken");
+
+      // Tạo mảng result từ quizzes và selectedAnswers
+      const result = quizzes.map((quiz) => {
+        const answer = selectedAnswers[quiz.id] || { title: "", point: 0 };
+        return {
+          title: quiz.title,
+          answer: answer.title || "",
+          point: answer.point || 0,
+        };
+      });
+
+      // Tạo payload cho API /userQuiz
+      const payload = {
+        accountId: user._id,
+        scoreBandId: matchedBand._id.$oid || matchedBand._id, // Lấy _id của scoreband
+        result: result,
+        totalPoint: totalScore,
+      };
+
+      console.log("Posting to /userQuiz with payload:", payload);
+
+      // Gửi yêu cầu POST đến API /userQuiz
+      const response = await api.post("/userQuiz", payload, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      console.log("Successfully posted to /userQuiz:", response.data);
+      return response.data;
+    } catch (err) {
+      console.error(
+        "Error posting to /userQuiz:",
+        err.response?.status,
+        err.response?.data || err.message
+      );
+      throw err;
     }
-    checkScoreBand(selectedAnswers);
   };
 
   // Kiểm tra totalScore với scoreband và tìm roadmap
-  const checkScoreBand = (answers) => {
+  const checkScoreBand = async (answers) => {
     const totalScore = Object.values(answers).reduce(
       (sum, answer) => sum + answer.point,
       0
@@ -162,6 +197,14 @@ export function QuizStatus() {
     if (matchedBand) {
       console.log("Matched ScoreBand:", matchedBand);
       console.log("ScoreBand roadmapId:", matchedBand.roadmapId);
+
+      // Gửi dữ liệu lên API /userQuiz trước khi tiếp tục
+      try {
+        await postUserQuiz(totalScore, matchedBand);
+      } catch (err) {
+        alert("Failed to save quiz result. Please try again.");
+        return; // Dừng lại nếu không gửi được dữ liệu lên API
+      }
 
       // Tìm roadmap tương ứng với roadmapId
       const matchedRoadmap = roadmaps.find((roadmap) => {
@@ -221,6 +264,15 @@ export function QuizStatus() {
       console.log("No matching score band found for score:", totalScore);
       alert("No matching score band found for your score.");
     }
+  };
+
+  // Xử lý khi nhấn nút Submit
+  const handleSubmit = async () => {
+    if (Object.keys(selectedAnswers).length !== quizzes.length) {
+      alert("Please answer all questions before submitting.");
+      return;
+    }
+    await checkScoreBand(selectedAnswers);
   };
 
   const renderQuiz = (quiz) => (
@@ -295,6 +347,13 @@ export function QuizStatus() {
                 )}
               </>
             )}
+            <TouchableOpacity
+              style={[styles.backToHome]}
+              onPress={() => navigation.navigate("DrawerNavigation")}
+            >
+              <Text style={styles.roadmapButtonText}>Back to Home</Text>
+              {/* <Ionicons name="arrow-forward" size={24} color="#FFF" /> */}
+            </TouchableOpacity>
             <TouchableOpacity
               style={[
                 styles.roadmapButton,
@@ -428,5 +487,13 @@ const styles = StyleSheet.create({
     color: "#FFF",
     fontSize: 16,
     fontWeight: "600",
+  },
+  backToHome: {
+    backgroundColor: "#F07D87",
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 6,
+    flexDirection: "row",
+    justifyContent: "center",
   },
 });
