@@ -6,6 +6,8 @@ import { BookingDetail, BookingTreatment } from "../screens/homepage";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { TreatmentNavigation, BookingNavigation } from "./homeRoute";
+import { QuizNavigation } from "./homeRoute/quizNavigation"; // Named import
+import { RoadmapScreen } from "../screens/homepage/roadmap/roadMapScreen";
 import { AuthNavigation } from "./authNavigation";
 import { BookingHistoryDetail } from "../screens/homepage/booking/bookingHistoryDetail";
 
@@ -85,6 +87,16 @@ function DrawerNavigation() {
           ),
         }}
       />
+      <Drawer.Screen
+        name="Quiz"
+        component={QuizNavigation}
+        options={{
+          title: "Quiz",
+          drawerIcon: ({ color, size }) => (
+            <Ionicons name="school-outline" size={size} color={color} />
+          ),
+        }}
+      />
     </Drawer.Navigator>
   );
 }
@@ -115,6 +127,11 @@ export function HomeNavigation() {
         name="BookingTreatment"
         component={BookingTreatment}
         options={{ title: "Booking Service", headerShown: true }}
+      />
+      <Home.Screen
+        name="RoadmapScreen"
+        component={RoadmapScreen}
+        options={{ title: "Roadmap Service", headerShown: true }}
       />
       <Home.Screen
         name="BookingHistoryDetail"
