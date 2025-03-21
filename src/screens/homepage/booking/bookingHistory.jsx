@@ -5,94 +5,111 @@ import {
   TouchableOpacity,
   SafeAreaView,
   ScrollView,
+  ActivityIndicator,
 } from "react-native";
 import { useState, useEffect } from "react";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
-
-// Updated dummy data with additional fields
-const dummyAppointments = [
-  {
-    id: "1",
-    service: "Facial Cleansing",
-    date: "2025-03-15",
-    time: "10:00 AM",
-    duration: "1h",
-    price: 50,
-    status: "Scheduled",
-    slot: "Morning",
-  },
-  {
-    id: "2",
-    service: "Hydrating Mask",
-    date: "2025-03-16",
-    time: "2:00 PM",
-    duration: "45m",
-    price: 40,
-    status: "In Progress",
-    slot: "Afternoon",
-    checkinImage: "https://example.com/checkin1.jpg",
-    checkoutImage: "https://example.com/checkout1.jpg",
-  },
-  {
-    id: "3",
-    service: "Chemical Peel",
-    date: "2025-03-17",
-    time: "11:30 AM",
-    duration: "1.5h",
-    price: 80,
-    status: "Completed",
-    slot: "Morning",
-    payment: { method: "Credit Card", amount: 80, date: "2025-03-17" },
-  },
-  {
-    id: "4",
-    service: "Microdermabrasion",
-    date: "2025-03-18",
-    time: "3:00 PM",
-    duration: "1h",
-    price: 60,
-    status: "Cancelled",
-    slot: "Afternoon",
-  },
-  {
-    id: "5",
-    service: "Acne Treatment",
-    date: "2025-03-19",
-    time: "9:30 AM",
-    duration: "1h",
-    price: 55,
-    status: "Scheduled",
-    slot: "Morning",
-  },
-  // Add more if needed...
-];
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import axios from "axios";
 
 export function BookingStatus() {
   const navigation = useNavigation();
-  const [appointments, setAppointments] = useState(dummyAppointments);
   const [filter, setFilter] = useState("All");
+  const [appointments, setAppointments] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  const fetchTransactions = async () => {
+    try {
+      setLoading(true);
+      const userData = await AsyncStorage.getItem("user");
+      const parsedData = userData ? JSON.parse(userData) : null;
+
+      // Check various possible structures of the user data
+      const user_id =
+        parsedData?.id || parsedData?.user?.id || parsedData?.data?.id;
+
+      if (!user_id) {
+        console.log("User data structure:", JSON.stringify(parsedData));
+        throw new Error("User information not available");
+      }
+
+      const response = await axios.get(
+        `${process.env.EXPO_PUBLIC_BASE_URL}/api/transaction/customer/${user_id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${parsedData.token}`,
+          },
+        }
+      );
+
+      if (response.data && response.data.data) {
+        // Transform the API response into the format we need
+        const formattedAppointments = response.data.data.map((item) => ({
+          id: item._id,
+          service: item.service.serviceName,
+          therapist: item.therapist.therapistName,
+          status: item.appointment.status,
+          amount: item.appointment.amount,
+          checkInImage: item.appointment.checkInImage,
+          checkOutImage: item.appointment.checkOutImage,
+          notes: item.appointment.notes,
+          // You might want to add date and time handling here when available
+          date: "N/A", // placeholder
+          time: "N/A", // placeholder
+          // Store the full item for detail view
+          fullData: item,
+        }));
+
+        setAppointments(formattedAppointments);
+      } else {
+        setAppointments([]);
+      }
+
+      setError(null);
+    } catch (err) {
+      console.error("Error fetching appointments:", err);
+      setError("Failed to load your booking history. Please try again later.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    if (filter === "All") {
-      setAppointments(dummyAppointments);
-    } else {
-      setAppointments(dummyAppointments.filter((appt) => appt.status === filter));
-    }
-  }, [filter]);
+    fetchTransactions();
+  }, []);
+
+  // Filter appointments based on selected filter
+  const filteredAppointments = appointments.filter(
+    (appt) => filter === "All" || appt.status === filter
+  );
 
   const renderAppointment = (appt) => (
     <TouchableOpacity
       style={styles.card}
-      onPress={() => navigation.navigate("BookingDetail", { appointment: appt })}
+      onPress={() =>
+        navigation.navigate("BookingHistoryDetail", { appointment: appt })
+      }
       key={appt.id}
     >
       <Text style={styles.service}>{appt.service}</Text>
       <View style={styles.details}>
         <Ionicons name="calendar-outline" size={16} color="#F07D87" />
-        <Text>{appt.date} - {appt.time}</Text>
+        <Text>
+          {appt.date} - {appt.time}
+        </Text>
       </View>
-      <Text style={[styles.status, { backgroundColor: getStatusColor(appt.status) }]}>
+      <View style={styles.details}>
+        <Ionicons name="person-outline" size={16} color="#F07D87" />
+        <Text>{appt.therapist}</Text>
+      </View>
+      <Text
+        style={[
+          styles.status,
+          { backgroundColor: getStatusColor(appt.status) },
+        ]}
+      >
         {appt.status}
       </Text>
     </TouchableOpacity>
@@ -100,33 +117,90 @@ export function BookingStatus() {
 
   const getStatusColor = (status) => {
     switch (status) {
-      case "Scheduled": return "#F07D87";
-      case "In Progress": return "#FFB6C1";
-      case "Completed": return "#98FB98";
-      case "Cancelled": return "#D3D3D3";
-      default: return "#F07D87";
+      case "Scheduled":
+        return "#F07D87";
+      case "InProgress":
+        return "#FFB6C1";
+      case "Completed":
+        return "#98FB98";
+      case "Cancelled":
+        return "#D3D3D3";
+      default:
+        return "#F07D87";
     }
   };
+
+  if (loading) {
+    return (
+      <SafeAreaView style={[styles.container, styles.centerContent]}>
+        <ActivityIndicator size="large" color="#F07D87" />
+        <Text style={styles.loadingText}>Loading your appointments...</Text>
+      </SafeAreaView>
+    );
+  }
+
+  if (error) {
+    return (
+      <SafeAreaView style={[styles.container, styles.centerContent]}>
+        <Ionicons name="alert-circle-outline" size={50} color="#F07D87" />
+        <Text style={styles.errorText}>{error}</Text>
+        <TouchableOpacity
+          style={styles.retryButton}
+          onPress={fetchTransactions}
+        >
+          <Text style={styles.retryButtonText}>Try Again</Text>
+        </TouchableOpacity>
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.container}>
       <Text style={styles.title}>Booking Status</Text>
       <View style={styles.filterContainer}>
-        {["All", "Scheduled", "In Progress", "Completed", "Cancelled"].map((f) => (
-          <TouchableOpacity
-            key={f}
-            style={[styles.filterButton, filter === f && styles.filterButtonActive]}
-            onPress={() => setFilter(f)}
-          >
-            <Text style={[styles.filterText, filter === f && styles.filterTextActive]}>
-              {f}
-            </Text>
-          </TouchableOpacity>
-        ))}
+        {["All", "Scheduled", "InProgress", "Completed", "Cancelled"].map(
+          (f) => (
+            <TouchableOpacity
+              key={f}
+              style={[
+                styles.filterButton,
+                filter === f && styles.filterButtonActive,
+              ]}
+              onPress={() => setFilter(f)}
+            >
+              <Text
+                style={[
+                  styles.filterText,
+                  filter === f && styles.filterTextActive,
+                ]}
+              >
+                {f}
+              </Text>
+            </TouchableOpacity>
+          )
+        )}
       </View>
-      <ScrollView style={styles.list}>
-        {appointments.map((appt) => renderAppointment(appt))}
-      </ScrollView>
+
+      {filteredAppointments.length > 0 ? (
+        <ScrollView style={styles.list}>
+          {filteredAppointments.map((appt) => renderAppointment(appt))}
+        </ScrollView>
+      ) : (
+        <View style={styles.emptyContainer}>
+          <Ionicons
+            name="calendar-outline"
+            size={60}
+            color="#F07D87"
+            opacity={0.5}
+          />
+          <Text style={styles.emptyText}>No appointments found</Text>
+          <Text style={styles.emptySubtext}>
+            {filter !== "All"
+              ? `You don't have any ${filter} appointments`
+              : "Book a treatment to get started"}
+          </Text>
+        </View>
+      )}
     </SafeAreaView>
   );
 }
@@ -135,6 +209,11 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#FFF",
+  },
+  centerContent: {
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 20,
   },
   title: {
     fontSize: 20,
@@ -177,6 +256,10 @@ const styles = StyleSheet.create({
     padding: 12,
     marginBottom: 10,
     elevation: 2,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
   },
   service: {
     fontSize: 16,
@@ -196,5 +279,45 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     borderRadius: 12,
     alignSelf: "flex-start",
+  },
+  loadingText: {
+    marginTop: 10,
+    color: "#666",
+    fontSize: 16,
+  },
+  errorText: {
+    marginTop: 10,
+    color: "#666",
+    fontSize: 16,
+    textAlign: "center",
+  },
+  retryButton: {
+    marginTop: 20,
+    backgroundColor: "#F07D87",
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+  },
+  retryButtonText: {
+    color: "#FFF",
+    fontWeight: "600",
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 20,
+  },
+  emptyText: {
+    fontSize: 18,
+    fontWeight: "600",
+    color: "#333",
+    marginTop: 15,
+  },
+  emptySubtext: {
+    fontSize: 14,
+    color: "#666",
+    textAlign: "center",
+    marginTop: 8,
   },
 });

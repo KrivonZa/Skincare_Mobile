@@ -1,33 +1,3 @@
-// import {
-//   View,
-//   StyleSheet,
-//   Text,
-//   TouchableOpacity,
-//   SafeAreaView,
-//   Button,
-// } from "react-native";
-// import { useState, useEffect, useRef } from "react";
-// import { Ionicons } from "@expo/vector-icons";
-// import { useNavigation } from "@react-navigation/native";
-
-// export function Profile() {
-//   const navigation = useNavigation();
-
-//   return (
-//     <SafeAreaView style={styles.container}>
-//       <Text>Profile</Text>
-//       <Button title="Edit Account" onPress={() => navigation.navigate("EditAccount")}></Button>
-//       <Button title="Quiz Record" onPress={() => navigation.navigate("QuizRecord")}></Button>
-//     </SafeAreaView>
-//   );
-// }
-
-// const styles = StyleSheet.create({
-//   container: {
-//     flex: 1,
-//   },
-// });
-
 import {
   View,
   StyleSheet,
@@ -40,23 +10,12 @@ import {
 import { useState, useEffect, useRef } from "react";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useAuth } from "../../context/AuthContext";
 
 export function Profile() {
   const navigation = useNavigation();
+  const { logout } = useAuth();
 
-  const logout = async () => {
-    try {
-      await AsyncStorage.removeItem('accessToken');
-      await AsyncStorage.removeItem('user');
-      navigation.reset({
-        index: 0,
-        routes: [{ name: "Auth", params: { screen: "Login" } }],
-      });
-    } catch (error) {
-      console.error('Logout failed:', error);
-    }
-  };
   const menuItems = [
     {
       title: "Skin Profile",
@@ -85,20 +44,34 @@ export function Profile() {
     },
   ];
 
+  const handleLogout = async () => {
+    try {
+      await logout();
+      navigation.reset({
+        index: 0,
+        routes: [{ name: "Auth", params: { screen: "Login" } }],
+      });
+    } catch (error) {
+      console.error("Logout failed:", error);
+    }
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView>
         {/* Profile Card */}
         <View style={styles.profileCard}>
           <Image
-            source={{ uri: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ec/Happy_smiley_face.png/640px-Happy_smiley_face.png" }}
+            source={{
+              uri: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ec/Happy_smiley_face.png/640px-Happy_smiley_face.png",
+            }}
             style={styles.profileImage}
             resizeMode="cover"
           />
           <Text style={styles.username}>User12345</Text>
           <Text style={styles.email}>user123@gmail.com</Text>
-          
-          <TouchableOpacity 
+
+          <TouchableOpacity
             style={styles.editButton}
             onPress={() => navigation.navigate("EditAccount")}
           >
@@ -114,9 +87,9 @@ export function Profile() {
               style={styles.menuItem}
               onPress={() => {
                 if (item.title === "Logout") {
-                  logout(); 
+                  handleLogout(); // Gọi hàm handleLogout
                 } else {
-                  navigation.navigate(item.screen); 
+                  navigation.navigate(item.screen);
                 }
               }}
             >

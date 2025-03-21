@@ -1,4 +1,5 @@
 import axios from "axios";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 let authContext = null;
 
@@ -13,6 +14,21 @@ const api = axios.create({
   },
   withCredentials: true,
 });
+
+api.interceptors.request.use(
+  async (config) => {
+    try {
+      const token = await AsyncStorage.getItem("accessToken");
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
+    } catch (error) {
+      console.error("Lỗi khi lấy accessToken:", error);
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
 
 // 🛠️ Add a response interceptor (Auto logout on 401)
 api.interceptors.response.use(
