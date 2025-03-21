@@ -94,6 +94,7 @@ export function BookingTreatment({ route }) {
                     time: "Select time",
                     duration: treatment.time || "90 Minutes",
                     status: "New Booking",
+                    detail: treatment,
                   },
                 })
               }
