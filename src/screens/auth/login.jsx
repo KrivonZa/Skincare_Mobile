@@ -13,7 +13,7 @@ import {
 import { useEffect, useRef, useState } from "react";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import api from "../../hooks/axiosInstance";
 import { useAuth } from "../../context/AuthContext";
 
@@ -22,8 +22,8 @@ const { height } = Dimensions.get("window");
 export function Login() {
   const translateY = useRef(new Animated.Value(height)).current;
   const [passwordVisible, setPasswordVisible] = useState(false);
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const navigation = useNavigation();
   const { login } = useAuth();
@@ -39,7 +39,6 @@ export function Login() {
     try {
       setIsLoading(true);
 
-      // Gọi API để lấy token
       const response = await api.post("/account/login", {
         email,
         password,
@@ -47,6 +46,7 @@ export function Login() {
       const token = response.data.token;
       await login(token);
       navigation.navigate("Main");
+      await AsyncStorage.setItem("user", JSON.stringify(response.data));
     } catch (error) {
       const errorMessage =
         error.response?.data?.message ||
@@ -107,7 +107,7 @@ export function Login() {
           disabled={isLoading}
         >
           <Text style={styles.loginButtonText}>
-            {isLoading ? 'Logging in...' : 'Login'}
+            {isLoading ? "Logging in..." : "Login"}
           </Text>
         </TouchableOpacity>
 

@@ -7,6 +7,7 @@ import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { TreatmentNavigation, BookingNavigation } from "./homeRoute";
 import { AuthNavigation } from "./authNavigation";
+import { BookingHistoryDetail } from "../screens/homepage/booking/bookingHistoryDetail";
 
 const Drawer = createDrawerNavigator();
 const Home = createStackNavigator();
@@ -114,6 +115,11 @@ export function HomeNavigation() {
         name="BookingTreatment"
         component={BookingTreatment}
         options={{ title: "Booking Service", headerShown: true }}
+      />
+      <Home.Screen
+        name="BookingHistoryDetail"
+        component={BookingHistoryDetail}
+        options={{ title: "Booking Detail", headerShown: true }}
       />
     </Home.Navigator>
   );
