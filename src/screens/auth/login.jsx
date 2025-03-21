@@ -15,6 +15,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import api from "../../hooks/axiosInstance";
+import { useAuth } from "../../context/AuthContext";
 
 const { height } = Dimensions.get("window");
 
@@ -25,6 +26,7 @@ export function Login() {
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const navigation = useNavigation();
+  const { login } = useAuth();
 
   useEffect(() => {
     Animated.timing(translateY, {
@@ -42,9 +44,9 @@ export function Login() {
         password,
       });
       const token = response.data.token;
-      await AsyncStorage.setItem("accessToken", token);
+      await login(token);
+      navigation.navigate("Main");
       await AsyncStorage.setItem("user", JSON.stringify(response.data));
-      navigation.navigate("Home");
     } catch (error) {
       const errorMessage =
         error.response?.data?.message ||

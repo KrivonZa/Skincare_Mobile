@@ -2,21 +2,34 @@ import React from "react";
 import { Image, View, StyleSheet, TouchableOpacity } from "react-native";
 import { createDrawerNavigator } from "@react-navigation/drawer";
 import { createStackNavigator } from "@react-navigation/stack";
-import { BookingDetail, BookingTreatment } from "../screens/homepage";
-import { Ionicons, MaterialIcons } from "@expo/vector-icons";
+import { AppointmentDetail } from "../screens/therapist";
+import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
-import { TreatmentNavigation, BookingNavigation } from "./homeRoute";
+import { ScheduleNavigation, AppointmentNavigation } from "./therapistRoute";
 import { AuthNavigation } from "./authNavigation";
-import { BookingHistoryDetail } from "../screens/homepage/booking/bookingHistoryDetail";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useAuth } from "../context/AuthContext";
 
 const Drawer = createDrawerNavigator();
-const Home = createStackNavigator();
+const Therapist = createStackNavigator();
 
 function DrawerNavigation() {
   const navigation = useNavigation();
+  const { logout } = useAuth();
+  const handleLogout = async () => {
+    try {
+      await logout();
+      navigation.reset({
+        index: 0,
+        routes: [{ name: "Auth", params: { screen: "Login" } }],
+      });
+    } catch (error) {
+      console.error("Logout failed:", error);
+    }
+  };
   return (
     <Drawer.Navigator
-      initialRouteName="Treatment"
+      initialRouteName="ScheduleNavigation"
       screenOptions={{
         headerStyle: {
           backgroundColor: "#ff909a",
@@ -47,22 +60,26 @@ function DrawerNavigation() {
       }}
     >
       <Drawer.Screen
-        name="Treatment"
-        component={TreatmentNavigation}
+        name="ScheduleNavigation"
+        component={ScheduleNavigation}
         options={{
-          title: "Service",
+          title: "Schedule",
           drawerIcon: ({ color, size }) => (
-            <Ionicons name="home-outline" size={size} color={color} />
+            <Ionicons
+              name="calendar-number-outline"
+              size={size}
+              color={color}
+            />
           ),
         }}
       />
       <Drawer.Screen
-        name="Booking"
-        component={BookingNavigation}
+        name="AppointmentNavigation"
+        component={AppointmentNavigation}
         options={{
-          title: "Booking History",
+          title: "Appointment",
           drawerIcon: ({ color, size }) => (
-            <MaterialIcons name="history" size={size} color={color} />
+            <Ionicons name="time-outline" size={size} color={color} />
           ),
         }}
       />
@@ -72,10 +89,7 @@ function DrawerNavigation() {
         listeners={{
           drawerItemPress: (e) => {
             e.preventDefault(); // Ngăn chuyển sang AuthNavigation trực tiếp
-            navigation.reset({
-              index: 0,
-              routes: [{ name: "Auth" }],
-            });
+            handleLogout();
           },
         }}
         options={{
@@ -89,9 +103,9 @@ function DrawerNavigation() {
   );
 }
 
-export function HomeNavigation() {
+export function TherapistNavigation() {
   return (
-    <Home.Navigator
+    <Therapist.Navigator
       initialRouteName="DrawerNavigation"
       screenOptions={{
         headerStyle: {
@@ -101,27 +115,17 @@ export function HomeNavigation() {
         headerTitleAlign: "center",
       }}
     >
-      <Home.Screen
+      <Therapist.Screen
         name="DrawerNavigation"
         component={DrawerNavigation}
         options={{ headerShown: false }}
       />
-      <Home.Screen
-        name="BookingDetail"
-        component={BookingDetail}
-        options={{ title: "Booking Detail", headerShown: true }}
+      <Therapist.Screen
+        name="AppointmentDetail"
+        component={AppointmentDetail}
+        options={{ title: "Appointment Detail", headerShown: true }}
       />
-      <Home.Screen
-        name="BookingTreatment"
-        component={BookingTreatment}
-        options={{ title: "Booking Service", headerShown: true }}
-      />
-      <Home.Screen
-        name="BookingHistoryDetail"
-        component={BookingHistoryDetail}
-        options={{ title: "Booking Detail", headerShown: true }}
-      />
-    </Home.Navigator>
+    </Therapist.Navigator>
   );
 }
 

@@ -26,7 +26,6 @@ export function TreatmentPage() {
       const response = await axios.get(
         `${process.env.EXPO_PUBLIC_BASE_URL}/api/service`
       );
-      console.log("Treatment data:", response.data);
       setTreatments(response.data);
       setError(null);
     } catch (err) {
